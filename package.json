@@ -1,5 +1,5 @@
 {
-  "name": "vue-modal",
+  "name": "@citygro/vue-modal",
   "version": "1.0.1",
   "description": "reusable modal component for vue 2",
   "main": "lib/index.js",

@@ -3,6 +3,7 @@ import hash from 'object-hash';
 import clone from 'lodash/fp/clone';
 import values from 'lodash/fp/values';
 import EventEmmitter from 'events';
+import $ from 'jquery';
 
 export default {
   install: function install(Vue, options) {
@@ -16,7 +17,10 @@ export default {
       render: function render(h) {
         return h(
           'div',
-          { 'class': { modal: true } },
+          { 'class': { modal: true }, on: {
+              'click': this.close
+            }
+          },
           [h(
             'div',
             { 'class': { 'modal-container': true } },
@@ -39,6 +43,30 @@ export default {
         close: function close() {
           modals.emit('destroy', this.id);
         }
+      },
+      mounted: function mounted() {
+        var _this = this;
+
+        var input = $(this.$el);
+        var onClick = function onClick(event) {
+          if (!input.is(event.target) && input.has(event.target).length === 0 && _this.showDropdown) {
+            _this.close();
+          }
+        };
+        $(document).on('click', onClick);
+        var onKeydown = function onKeydown(event) {
+          if (_this.showDropdown && event.keyCode === 27) {
+            _this.close();
+          }
+        };
+        $(document).on('keydown', onKeydown);
+        this._unsubscribe = function () {
+          $(document).off('click', onClick);
+          $(document).off('keydown', onKeydown);
+        };
+      },
+      beforeDestroy: function beforeDestroy() {
+        this._unsubscribe();
       }
     });
     /**
@@ -77,14 +105,14 @@ export default {
        * register listeners to add/remove Modals and corresponding data
        */
       beforeCreate: function beforeCreate() {
-        var _this = this;
+        var _this2 = this;
 
         var onOpen = function onOpen(event) {
-          Vue.set(_this.modals, event.id, event);
+          Vue.set(_this2.modals, event.id, event);
         };
         modals.on('open', onOpen);
         var onDestroy = function onDestroy(id) {
-          Vue.delete(_this.modals, id);
+          Vue.delete(_this2.modals, id);
         };
         modals.on('destroy', onDestroy);
         this._unsubscribe = function () {

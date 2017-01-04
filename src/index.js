@@ -3,6 +3,7 @@ import hash from 'object-hash'
 import clone from 'lodash/fp/clone'
 import values from 'lodash/fp/values'
 import EventEmmitter from 'events'
+import $ from 'jquery'
 
 export default {
   install (Vue, options) {
@@ -14,7 +15,7 @@ export default {
     const ModalWrapper = Vue.component('modal-wrapper', { // eslint-disable-line no-unused-vars
       render (h) {
         return (
-          <div class={{modal: true}}>
+          <div class={{modal: true}} onClick={this.close}>
             <div class={{'modal-container': true}}>
               <div class={{'modal-wrapper': true}}>
                 {this.$slots.default}
@@ -33,6 +34,28 @@ export default {
         close () {
           modals.emit('destroy', this.id)
         }
+      },
+      mounted () {
+        const input = $(this.$el)
+        const onClick = (event) => {
+          if (!input.is(event.target) && input.has(event.target).length === 0 && this.showDropdown) {
+            this.close()
+          }
+        }
+        $(document).on('click', onClick)
+        const onKeydown = (event) => {
+          if (this.showDropdown && event.keyCode === 27) {
+            this.close()
+          }
+        }
+        $(document).on('keydown', onKeydown)
+        this._unsubscribe = () => {
+          $(document).off('click', onClick)
+          $(document).off('keydown', onKeydown)
+        }
+      },
+      beforeDestroy () {
+        this._unsubscribe()
       }
     })
     /**

@@ -1,0 +1,26 @@
+html {
+  background-color: #eee;
+  font-family: sans-serif;
+}
+
+.btn {
+  cursor: pointer;
+  background-color: aquamarine;
+  border-radius: 0.75em;
+  padding: 0.5em;
+}
+
+.btn:hover {
+  background-color: aqua;
+}
+
+.modal-container {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}

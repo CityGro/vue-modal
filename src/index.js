@@ -36,7 +36,7 @@ export default {
         }
       },
       mounted () {
-        const input = $(this.$el)
+        const input = $(this.$el).find('.modal-wrapper').first()
         const onClick = (event) => {
           if (!input.is(event.target) && input.has(event.target).length === 0 && this.showDropdown) {
             this.close()

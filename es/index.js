@@ -44,7 +44,7 @@ export default {
       mounted: function mounted() {
         var _this = this;
 
-        var input = $(this.$el);
+        var input = $(this.$el).find('.modal-wrapper').first();
         var onClick = function onClick(event) {
           if (!input.is(event.target) && input.has(event.target).length === 0 && _this.showDropdown) {
             _this.close();

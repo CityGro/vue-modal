@@ -15,7 +15,7 @@ export default {
     const ModalWrapper = Vue.component('modal-wrapper', { // eslint-disable-line no-unused-vars
       render (h) {
         return (
-          <div class={{modal: true}} onClick={this.close}>
+          <div class={{modal: true}}>
             <div class={{'modal-container': true}}>
               <div class={{'modal-wrapper': true}}>
                 {this.$slots.default}

@@ -17,10 +17,7 @@ export default {
       render: function render(h) {
         return h(
           'div',
-          { 'class': { modal: true }, on: {
-              'click': this.close
-            }
-          },
+          { 'class': { modal: true } },
           [h(
             'div',
             { 'class': { 'modal-container': true } },

@@ -14,19 +14,7 @@ export default {
     var ModalWrapper = Vue.component('modal-wrapper', {
       // eslint-disable-line no-unused-vars
       render: function render(h) {
-        return h(
-          'div',
-          { 'class': { modal: true } },
-          [h(
-            'div',
-            { 'class': { 'modal-container': true } },
-            [h(
-              'div',
-              { 'class': { 'modal-wrapper': true } },
-              [this.$slots.default]
-            )]
-          )]
-        );
+        return h('div', { class: { modal: true } }, [h('div', { class: { 'modal-container': true } }, [h('div', { class: { 'modal-wrapper': true } }, [this.$slots.default])])]);
       },
 
       props: {
@@ -75,13 +63,11 @@ export default {
           var Modal = _ref.Modal,
               data = _ref.data,
               id = _ref.id;
-          return h(ModalWrapper, { attrs: { id: id } }, h(Modal, { props: data }));
+          return h(ModalWrapper, {
+            attrs: { id: id }
+          }, [h(Modal, { props: data })]);
         });
-        return h(
-          'div',
-          null,
-          [modals(values(this.modals))]
-        );
+        return h('div', null, modals(values(this.modals)));
       },
       data: function data() {
         return { modals: {} };

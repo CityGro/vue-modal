@@ -63,11 +63,7 @@ export default {
      */
     Vue.component('modal-view', {
       render (h) {
-        const modals = map(({Modal, data, id}) => (
-          <ModalWrapper id={id}>
-            <Modal {...data} />
-          </ModalWrapper>
-        ))
+        const modals = map(({Modal, data, id}) => h(ModalWrapper, {attrs: {id}}, h(Modal, {props: data})))
         return (
           <div>
             {modals(values(this.modals))}

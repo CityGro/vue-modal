@@ -75,17 +75,7 @@ export default {
           var Modal = _ref.Modal,
               data = _ref.data,
               id = _ref.id;
-          return h(
-            ModalWrapper,
-            {
-              attrs: { id: id }
-            },
-            [h(
-              Modal,
-              data,
-              []
-            )]
-          );
+          return h(ModalWrapper, { attrs: { id: id } }, h(Modal, { props: data }));
         });
         return h(
           'div',

@@ -1,6 +1,5 @@
 import map from 'lodash/fp/map'
 import hash from 'object-hash'
-import clone from 'lodash/fp/clone'
 import values from 'lodash/fp/values'
 import EventEmmitter from 'events'
 import $ from 'jquery'
@@ -66,7 +65,7 @@ export default {
       render (h) {
         const modals = map(({Modal, data, id}) => (
           <ModalWrapper id={id}>
-            <Modal {...clone(data)} />
+            <Modal {...data} />
           </ModalWrapper>
         ))
         return (

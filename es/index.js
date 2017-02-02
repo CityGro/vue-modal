@@ -1,6 +1,5 @@
 import map from 'lodash/fp/map';
 import hash from 'object-hash';
-import clone from 'lodash/fp/clone';
 import values from 'lodash/fp/values';
 import EventEmmitter from 'events';
 import $ from 'jquery';
@@ -83,7 +82,7 @@ export default {
             },
             [h(
               Modal,
-              clone(data),
+              data,
               []
             )]
           );

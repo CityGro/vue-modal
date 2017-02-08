@@ -164,7 +164,8 @@ export default {
           }
         };
         modals.on('open', function (event) {
-          return stack.push([event.id, event]);
+          stack.push([event.id, event]);
+          _this2.$forceUpdate();
         });
         modals.on('close', onDestroy('close'));
         modals.on('dismiss', onDestroy('dismiss'));

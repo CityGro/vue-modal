@@ -154,7 +154,10 @@ export default {
             modals.emit('dismiss', id)
           }
         }
-        modals.on('open', (event) => stack.push([event.id, event]))
+        modals.on('open', (event) => {
+          stack.push([event.id, event])
+          this.$forceUpdate()
+        })
         modals.on('close', onDestroy('close'))
         modals.on('dismiss', onDestroy('dismiss'))
         $(document).on('keydown', onKeydown)

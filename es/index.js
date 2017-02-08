@@ -120,11 +120,11 @@ export default {
             props: { title: title }
           }, [h(Modal, { props: data })]);
         });
-        return h('div', null, modals(values(this.modals)));
+        return h('div', null, modals(values(this.getModals())));
       },
 
-      computed: {
-        modals: function modals() {
+      methods: {
+        getModals: function getModals() {
           return keyBy(function (_ref2) {
             var _ref3 = _slicedToArray(_ref2, 1),
                 id = _ref3[0];

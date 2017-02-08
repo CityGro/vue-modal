@@ -127,10 +127,10 @@ export default {
         }, [
           h(Modal, {props: data})
         ]))
-        return h('div', null, modals(values(this.modals)))
+        return h('div', null, modals(values(this.getModals())))
       },
-      computed: {
-        modals () {
+      methods: {
+        getModals () {
           return keyBy(([id]) => id)(stack)
         }
       },

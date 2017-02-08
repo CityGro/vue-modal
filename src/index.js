@@ -134,6 +134,9 @@ export default {
           return keyBy(([id]) => id)(stack)
         }
       },
+      computed: {
+        stack: () => stack
+      },
       /**
        * register listeners to add/remove Modals and corresponding data
        */
@@ -179,10 +182,9 @@ export default {
      * @param {string} options.title - modal title
      */
     Vue.prototype.$openModal = function ({data = {}, modal}) {
-      return Q.Promise((resolve, reject, notify) => {
+      return Q.Promise((resolve, reject) => {
         modal((Modal) => {
           const id = hash({Modal, data})
-          notify(id)
           modals.emit('open', {id, Modal, data, resolve, reject})
         })
       })

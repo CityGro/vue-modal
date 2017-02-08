@@ -13,7 +13,7 @@ import Q from 'q';
 export default {
   install: function install(Vue, options) {
     var modals = new EventEmmitter();
-    var stack = [];
+    var _stack = [];
     /**
      * style this component! use `.modal`, `.modal-container`, and `.modal-wrapper`
      * @function
@@ -130,7 +130,12 @@ export default {
                 id = _ref3[0];
 
             return id;
-          })(stack);
+          })(_stack);
+        }
+      },
+      computed: {
+        stack: function stack() {
+          return _stack;
         }
       },
       /**
@@ -146,25 +151,25 @@ export default {
                   _id = _ref5[0];
 
               return id === _id;
-            })(stack);
+            })(_stack);
             if (method === 'close') {
-              stack[index][1].resolve();
+              _stack[index][1].resolve();
             } else if (method === 'dismiss') {
-              stack[index][1].reject();
+              _stack[index][1].reject();
             }
-            delete stack[index];
+            delete _stack[index];
             _this2.$forceUpdate();
           };
         };
         var onKeydown = function onKeydown(event) {
           if (event.keyCode == 27) {
             // eslint-disable-line eqeqeq
-            var id = last(stack)[0];
+            var id = last(_stack)[0];
             modals.emit('dismiss', id);
           }
         };
         modals.on('open', function (event) {
-          stack.push([event.id, event]);
+          _stack.push([event.id, event]);
           _this2.$forceUpdate();
         });
         modals.on('close', onDestroy('close'));
@@ -192,10 +197,9 @@ export default {
           data = _ref6$data === undefined ? {} : _ref6$data,
           modal = _ref6.modal;
 
-      return Q.Promise(function (resolve, reject, notify) {
+      return Q.Promise(function (resolve, reject) {
         modal(function (Modal) {
           var id = hash({ Modal: Modal, data: data });
-          notify(id);
           modals.emit('open', { id: id, Modal: Modal, data: data, resolve: resolve, reject: reject });
         });
       });

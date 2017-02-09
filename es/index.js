@@ -1,11 +1,10 @@
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 import map from 'lodash/fp/map';
-import keyBy from 'lodash/fp/keyBy';
 import last from 'lodash/fp/last';
+import flow from 'lodash/fp/flow';
 import hash from 'object-hash';
 import findIndex from 'lodash/fp/findIndex';
-import values from 'lodash/fp/values';
 import EventEmmitter from 'events';
 import $ from 'jquery';
 import Q from 'q';
@@ -111,28 +110,24 @@ export default {
     Vue.component('modal-view', {
       render: function render(h) {
         var modals = map(function (_ref) {
-          var Modal = _ref.Modal,
-              data = _ref.data,
-              id = _ref.id,
-              title = _ref.title;
+          var id = _ref.id,
+              title = _ref.title,
+              Modal = _ref.Modal,
+              data = _ref.data;
           return h(ModalWrapper, {
             attrs: { id: id },
             props: { title: title }
           }, [h(Modal, { props: data })]);
         });
-        return h('div', null, modals(values(this.getModals())));
+        return h('div', null, flow(map(function (_ref2) {
+          var _ref3 = _slicedToArray(_ref2, 2),
+              id = _ref3[0],
+              modal = _ref3[1];
+
+          return modal;
+        }), modals)(this.stack));
       },
 
-      methods: {
-        getModals: function getModals() {
-          return keyBy(function (_ref2) {
-            var _ref3 = _slicedToArray(_ref2, 1),
-                id = _ref3[0];
-
-            return id;
-          })(_stack);
-        }
-      },
       computed: {
         stack: function stack() {
           return _stack;
@@ -193,14 +188,16 @@ export default {
      * @param {string} options.title - modal title
      */
     Vue.prototype.$openModal = function (_ref6) {
-      var _ref6$data = _ref6.data,
+      var _ref6$title = _ref6.title,
+          title = _ref6$title === undefined ? '' : _ref6$title,
+          _ref6$data = _ref6.data,
           data = _ref6$data === undefined ? {} : _ref6$data,
           modal = _ref6.modal;
 
       return Q.Promise(function (resolve, reject) {
         modal(function (Modal) {
           var id = hash({ Modal: Modal, data: data });
-          modals.emit('open', { id: id, Modal: Modal, data: data, resolve: resolve, reject: reject });
+          modals.emit('open', { id: id, title: title, Modal: Modal, data: data, resolve: resolve, reject: reject });
         });
       });
     };

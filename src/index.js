@@ -1,9 +1,8 @@
 import map from 'lodash/fp/map'
-import keyBy from 'lodash/fp/keyBy'
 import last from 'lodash/fp/last'
+import flow from 'lodash/fp/flow'
 import hash from 'object-hash'
 import findIndex from 'lodash/fp/findIndex'
-import values from 'lodash/fp/values'
 import EventEmmitter from 'events'
 import $ from 'jquery'
 import Q from 'q'
@@ -121,18 +120,13 @@ export default {
      */
     Vue.component('modal-view', {
       render (h) {
-        const modals = map(({Modal, data, id, title}) => h(ModalWrapper, {
+        const modals = map(({id, title, Modal, data}) => h(ModalWrapper, {
           attrs: {id},
           props: {title}
         }, [
           h(Modal, {props: data})
         ]))
-        return h('div', null, modals(values(this.getModals())))
-      },
-      methods: {
-        getModals () {
-          return keyBy(([id]) => id)(stack)
-        }
+        return h('div', null, flow(map(([id, modal]) => modal), modals)(this.stack))
       },
       computed: {
         stack: () => stack
@@ -181,11 +175,11 @@ export default {
      * @param {function} options.modal - async require
      * @param {string} options.title - modal title
      */
-    Vue.prototype.$openModal = function ({data = {}, modal}) {
+    Vue.prototype.$openModal = function ({title = '', data = {}, modal}) {
       return Q.Promise((resolve, reject) => {
         modal((Modal) => {
           const id = hash({Modal, data})
-          modals.emit('open', {id, Modal, data, resolve, reject})
+          modals.emit('open', {id, title, Modal, data, resolve, reject})
         })
       })
     }

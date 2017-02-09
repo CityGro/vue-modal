@@ -19,6 +19,7 @@ export default {
      */
     var ModalWrapper = Vue.component('modal-wrapper', {
       render: function render(h) {
+        var self = this;
         return h('div', {
           class: {
             modal: true
@@ -46,15 +47,15 @@ export default {
             'aria-hidden': true
           },
           on: {
-            click: this.dismiss()
+            click: self.dismiss
           }
-        }, '×')]), h('h4', { class: { 'modal-title': true } }, this.title)]), h('div', { class: { 'modal-body': true } }, [this.$slots.default]), h('div', { class: { 'modal-footer': true } }, [h('button', {
+        }, '×')]), h('h4', { class: { 'modal-title': true } }, this.title)]), h('div', { class: { 'modal-body': true } }, [self.$slots.default]), h('div', { class: { 'modal-footer': true } }, [h('button', {
           class: {
             'btn': true,
             'btn-default': true
           },
           on: {
-            click: this.dismiss()
+            click: self.dismiss
           }
         }, 'Close'), h('button', {
           class: {
@@ -62,7 +63,7 @@ export default {
             'btn-primary': true
           },
           on: {
-            click: this.close()
+            click: self.close
           }
         }, 'OK')])])])]);
       },
@@ -109,6 +110,7 @@ export default {
      */
     Vue.component('modal-view', {
       render: function render(h) {
+        var self = this;
         var modals = map(function (_ref) {
           var id = _ref.id,
               title = _ref.title,
@@ -121,7 +123,7 @@ export default {
         });
         return h('div', null, flow(map(function (item) {
           return last(item);
-        }), without([undefined, null]), modals)(this.stack));
+        }), without([undefined, null]), modals)(self.stack));
       },
 
       computed: {

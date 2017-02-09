@@ -12,7 +12,7 @@ import Q from 'q';
 export default {
   install: function install(Vue, options) {
     var modals = new EventEmmitter();
-    var _stack = [];
+    var stack = [];
     /**
      * style this component! use bootstrap 3 modal classes
      * @function
@@ -110,8 +110,7 @@ export default {
      */
     Vue.component('modal-view', {
       render: function render(h) {
-        var self = this;
-        var modals = map(function (_ref) {
+        return h('div', null, map(function (_ref) {
           var id = _ref.id,
               title = _ref.title,
               Modal = _ref.Modal,
@@ -120,15 +119,14 @@ export default {
             attrs: { id: id },
             props: { title: title }
           }, [h(Modal, { props: data })]);
-        });
-        return h('div', null, flow(map(function (item) {
-          return last(item);
-        }), without([undefined, null]), modals)(self.stack));
+        })(this.modals));
       },
 
       computed: {
-        stack: function stack() {
-          return _stack;
+        modals: function modals() {
+          return flow(map(function (item) {
+            return last(item);
+          }), without([undefined, null]))(stack);
         }
       },
       /**
@@ -141,14 +139,14 @@ export default {
           return function (id) {
             var index = findIndex(function (modal) {
               return first(modal) === id;
-            })(_stack);
-            if (_stack[index]) {
+            })(stack);
+            if (stack[index]) {
               if (method === 'close') {
-                _stack[index][1].resolve();
+                stack[index][1].resolve();
               } else if (method === 'dismiss') {
-                _stack[index][1].reject();
+                stack[index][1].reject();
               }
-              _stack.splice(index, 1);
+              stack.splice(index, 1);
               _this2.$forceUpdate();
             }
           };
@@ -156,12 +154,12 @@ export default {
         var onKeydown = function onKeydown(event) {
           if (event.keyCode == 27) {
             // eslint-disable-line eqeqeq
-            var id = last(_stack)[0];
+            var id = last(stack)[0];
             modals.emit('dismiss', id);
           }
         };
         modals.on('open', function (event) {
-          _stack.push([event.id, event]);
+          stack.push([event.id, event]);
           _this2.$forceUpdate();
         });
         modals.on('close', onDestroy('close'));

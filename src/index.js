@@ -123,17 +123,15 @@ export default {
      */
     Vue.component('modal-view', {
       render (h) {
-        const self = this
-        const modals = map(({id, title, Modal, data}) => h(ModalWrapper, {
+        return h('div', null, map(({id, title, Modal, data}) => h(ModalWrapper, {
           attrs: {id},
           props: {title}
         }, [
           h(Modal, {props: data})
-        ]))
-        return h('div', null, flow(map((item) => last(item)), without([undefined, null]), modals)(self.stack))
+        ]))(this.modals))
       },
       computed: {
-        stack: () => stack
+        modals: () => flow(map((item) => last(item)), without([undefined, null]))(stack)
       },
       /**
        * register listeners to add/remove Modals and corresponding data

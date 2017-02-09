@@ -14,7 +14,7 @@ export default {
     const modals = new EventEmmitter()
     let stack = []
     /**
-     * style this component! use `.modal`, `.modal-container`, and `.modal-wrapper`
+     * style this component! use bootstrap 3 modal classes
      * @function
      */
     const ModalWrapper = Vue.component('modal-wrapper', {
@@ -108,7 +108,7 @@ export default {
             this.close()
           }
         }
-        $(document).on('click', onClick)
+        $(document).one('click', onClick)
         this._unsubscribe = () => {
           $(document).off('click', onClick)
         }
@@ -147,7 +147,7 @@ export default {
             } else if (method === 'dismiss') {
               stack[index][1].reject()
             }
-            delete stack[index]
+            stack.splice(index, 1)
             this.$forceUpdate()
           }
         }

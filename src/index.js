@@ -1,4 +1,6 @@
 import map from 'lodash/fp/map'
+import without from 'lodash/fp/without'
+import first from 'lodash/fp/first'
 import last from 'lodash/fp/last'
 import flow from 'lodash/fp/flow'
 import hash from 'object-hash'
@@ -126,7 +128,7 @@ export default {
         }, [
           h(Modal, {props: data})
         ]))
-        return h('div', null, flow(map(([id, modal]) => modal), modals)(this.stack))
+        return h('div', null, flow(map((item) => last(item)), without([undefined, null]), modals)(this.stack))
       },
       computed: {
         stack: () => stack
@@ -136,7 +138,7 @@ export default {
        */
       beforeCreate () {
         const onDestroy = (method) => (id) => {
-          const index = findIndex(([_id]) => id === _id)(stack)
+          const index = findIndex((modal) => first(modal) === id)(stack)
           if (method === 'close') {
             stack[index][1].resolve()
           } else if (method === 'dismiss') {

@@ -1,6 +1,6 @@
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 import map from 'lodash/fp/map';
+import without from 'lodash/fp/without';
+import first from 'lodash/fp/first';
 import last from 'lodash/fp/last';
 import flow from 'lodash/fp/flow';
 import hash from 'object-hash';
@@ -119,13 +119,9 @@ export default {
             props: { title: title }
           }, [h(Modal, { props: data })]);
         });
-        return h('div', null, flow(map(function (_ref2) {
-          var _ref3 = _slicedToArray(_ref2, 2),
-              id = _ref3[0],
-              modal = _ref3[1];
-
-          return modal;
-        }), modals)(this.stack));
+        return h('div', null, flow(map(function (item) {
+          return last(item);
+        }), without([undefined, null]), modals)(this.stack));
       },
 
       computed: {
@@ -141,11 +137,8 @@ export default {
 
         var onDestroy = function onDestroy(method) {
           return function (id) {
-            var index = findIndex(function (_ref4) {
-              var _ref5 = _slicedToArray(_ref4, 1),
-                  _id = _ref5[0];
-
-              return id === _id;
+            var index = findIndex(function (modal) {
+              return first(modal) === id;
             })(_stack);
             if (method === 'close') {
               _stack[index][1].resolve();
@@ -187,12 +180,12 @@ export default {
      * @param {function} options.modal - async require
      * @param {string} options.title - modal title
      */
-    Vue.prototype.$openModal = function (_ref6) {
-      var _ref6$title = _ref6.title,
-          title = _ref6$title === undefined ? '' : _ref6$title,
-          _ref6$data = _ref6.data,
-          data = _ref6$data === undefined ? {} : _ref6$data,
-          modal = _ref6.modal;
+    Vue.prototype.$openModal = function (_ref2) {
+      var _ref2$title = _ref2.title,
+          title = _ref2$title === undefined ? '' : _ref2$title,
+          _ref2$data = _ref2.data,
+          data = _ref2$data === undefined ? {} : _ref2$data,
+          modal = _ref2.modal;
 
       return Q.Promise(function (resolve, reject) {
         modal(function (Modal) {

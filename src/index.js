@@ -139,13 +139,15 @@ export default {
       beforeCreate () {
         const onDestroy = (method) => (id) => {
           const index = findIndex((modal) => first(modal) === id)(stack)
-          if (method === 'close') {
-            stack[index][1].resolve()
-          } else if (method === 'dismiss') {
-            stack[index][1].reject()
+          if (stack[index]) {
+            if (method === 'close') {
+              stack[index][1].resolve()
+            } else if (method === 'dismiss') {
+              stack[index][1].reject()
+            }
+            delete stack[index]
+            this.$forceUpdate()
           }
-          delete stack[index]
-          this.$forceUpdate()
         }
         const onKeydown = (event) => {
           if (event.keyCode == 27) { // eslint-disable-line eqeqeq

@@ -140,13 +140,15 @@ export default {
             var index = findIndex(function (modal) {
               return first(modal) === id;
             })(_stack);
-            if (method === 'close') {
-              _stack[index][1].resolve();
-            } else if (method === 'dismiss') {
-              _stack[index][1].reject();
+            if (_stack[index]) {
+              if (method === 'close') {
+                _stack[index][1].resolve();
+              } else if (method === 'dismiss') {
+                _stack[index][1].reject();
+              }
+              delete _stack[index];
+              _this2.$forceUpdate();
             }
-            delete _stack[index];
-            _this2.$forceUpdate();
           };
         };
         var onKeydown = function onKeydown(event) {

@@ -9,6 +9,7 @@ see `./example` for a working demonstration
 // App.vue
 import Vue from 'vue'
 import VueModal from 'vue-modal'
+import noop from 'lodash/noop'
 
 Vue.use(VueModal)
 
@@ -22,7 +23,7 @@ Vue.component('my-component', {
         title: 'My Title',
         confirmationLabel: 'okay',
         ignoreScaffolding: false // inject your component into the default modal
-      }).then(({modal: VueComponent, result: Promise}) => {
+      }).then(({modal: VueComponent, result: Promise}, noop, ({loading}) => this.loading = loading) => {
         setTimeout(() => modal.$parent.close(), 10000) // close after 10s
         return result
       }).then(() => console.log('close')).catch(() => console.error('dismiss'))
@@ -55,10 +56,14 @@ new Vue({
 - `size: String` (optional) specify modal size (one of: `'sm'`, `'lg'`, or `'full'`)
 - `title: String` modal title, default: `''`
 
-#### return `Promise<{modal: VueComponent, result: Promise}>`
+#### return `Promise<{modal: VueComponent, result: Promise}, Error, ({loading: Boolean}) => void>`
 
 - `modal: VueComponent` the loaded modal component
 - `result: Promise` a `Promise` that is resolved (close) or rejected (dismiss) depending on user input
+
+`@citygro/vue-modal` uses `Q.Promise` to handle async actions. in addition to the standard `onFulfilled` and `onRejected`
+callbacks, you can listen for `onProgress` calls and receive notifications about the loading state of the component in
+question.
 
 ### `vm.$parent.close()`
 

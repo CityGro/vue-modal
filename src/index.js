@@ -9,7 +9,7 @@ import $ from 'jquery'
 import Q from 'q'
 
 export default {
-  install (Vue, options) {
+  install (Vue) {
     const modals = new EventEmmitter()
     let stack = []
     /**
@@ -106,13 +106,12 @@ export default {
           modals.emit('dismiss', this.id)
         }
       },
-      beforeCreate () {
-        modals.on('open', () => {
-          this.$forceUpdate()
-        })
-      },
       mounted () {
         const input = $(this.$el).find('.modal-dialog').first()
+        /**
+         *
+         * @param event
+         */
         const onClick = (event) => {
           if (!input.is(event.target) && input.has(event.target).length === 0) {
             this.close()
@@ -132,20 +131,58 @@ export default {
     /**
      * place this somewhere in your component hierarchy, modals will render here.
      * @function
+     * @param {Boolean} disableLoadingIndicator - disable built-in loading indicator
      */
     Vue.component('modal-view', {
       render (h) {
-        return h('div', null, map(({id, title, confirmationLabel, ignoreScaffolding, size, Modal, data}) => {
+        const overlay = (this.loading) ? [
+          h('div', {
+            class: {
+              'modal-loading': true
+            },
+            style: {
+              'position': 'fixed',
+              'top': 0,
+              'left': 0,
+              'height': '100vh',
+              'width': '100vw',
+              'background-color': 'rgba(0, 0, 0, 0.5)',
+              'text-align': 'center'
+            }
+          }, [
+            h('i', {
+              class: {
+                'fa': true,
+                'fa-spinner': true,
+                'fa-spin': true
+              },
+              style: {
+                'font-size': '5em',
+                'margin-top': '25%'
+              }
+            })
+          ])
+        ] : []
+        return h('div', null, overlay.concat(map(({id, title, confirmationLabel, ignoreScaffolding, size, Modal, data}) => {
           return h(ModalWrapper, {
             attrs: {id},
             props: {title, confirmationLabel, size, ignoreScaffolding}
           }, [
             h(Modal, {props: data})
           ])
-        })(this.modals))
+        })(this.modals)))
+      },
+      props: {
+        disableLoadingIndicator: {
+          type: Boolean,
+          default: false
+        }
       },
       data () {
-        return {modal: this.getModals()}
+        return {
+          modals: this.getModals(),
+          loading: false
+        }
       },
       methods: {
         getModals () {
@@ -156,6 +193,10 @@ export default {
        * register listeners to add/remove Modals and corresponding data
        */
       beforeCreate () {
+        /**
+         *
+         * @param method
+         */
         const onDestroy = (method) => (id) => {
           const index = findIndex((modal) => first(modal) === id)(stack)
           if (stack[index]) {
@@ -169,20 +210,42 @@ export default {
             this.$forceUpdate()
           }
         }
+        /**
+         *
+         * @param event
+         */
         const onKeydown = (event) => {
           if (event.keyCode == 27) { // eslint-disable-line eqeqeq
             try {
               const id = last(stack)[0]
               modals.emit('dismiss', id)
-            } catch (e) {}
+            } catch (e) {
+            }
           }
         }
+        /**
+         * update modal data onOpen
+         */
         modals.on('open', () => {
           this.modals = this.getModals()
-          this.$forceUpdate()
         })
+        /**
+         * update loading state
+         */
+        modals.on('progress', (loading) => {
+          this.loading = this.loading || loading
+        })
+        /**
+         * close the modal (resolve)
+         */
         modals.on('close', onDestroy('close'))
+        /**
+         * dismiss the modal (reject)
+         */
         modals.on('dismiss', onDestroy('dismiss'))
+        /**
+         * press escape to close
+         */
         $(document).on('keydown', onKeydown)
         this._unsubscribe = () => {
           modals.off('open')
@@ -197,29 +260,36 @@ export default {
     })
     /**
      * @param {object} options
-     * @param {object} options.data - data to pass into the modal instance
-     * @param {function} options.modal - async require
-     * @param {string} options.title - modal title
-     * @param {string} options.confirmationLabel - label for confirmation button
      * @param {boolean} options.ignoreScaffolding - do not include header or footer elements
+     * @param {function} options.modal - async require
+     * @param {object} options.data - data to pass into the modal instance
+     * @param {string} options.confirmationLabel - label for confirmation button
+     * @param {string} options.title - modal title
      */
     Vue.prototype.$openModal = function ({
-      title = '',
       confirmationLabel = 'okay',
-      size = '',
-      ignoreScaffolding = false,
       data = {},
-      modal
+      ignoreScaffolding = false,
+      modal,
+      size = '',
+      title = ''
     }) {
-      return Q.Promise((resolve, reject) => {
+      return Q.Promise((resolve, reject, notify) => {
+        let status = {loading: true}
+        const poll = setInterval(() => {
+          notify(status)
+          modals.emit('progress', status.loading)
+        }, 100)
         try {
           modal((Modal) => {
+            status.loading = false
             const id = hash({Modal, data})
             resolve({
               modal: Modal,
               result: Q.Promise((resolve, reject) => {
                 stack.push([id, {id, title, confirmationLabel, size, ignoreScaffolding, Modal, data, resolve, reject}])
                 modals.emit('open', id)
+                clearInterval(poll)
               })
             })
           })

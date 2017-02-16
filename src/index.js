@@ -1,11 +1,10 @@
 import map from 'lodash/fp/map'
-import without from 'lodash/fp/without'
 import first from 'lodash/fp/first'
 import last from 'lodash/fp/last'
-import flow from 'lodash/fp/flow'
 import hash from 'object-hash'
 import findIndex from 'lodash/fp/findIndex'
 import EventEmmitter from 'events'
+import fromPairs from 'lodash/fp/fromPairs'
 import $ from 'jquery'
 import Q from 'q'
 
@@ -22,7 +21,8 @@ export default {
         const self = this
         return h('div', {
           class: {
-            modal: true
+            modal: true,
+            show: true
           }
         }, [
           h('div', {
@@ -56,19 +56,10 @@ export default {
                     }
                   }, '×')
                 ]),
-                h('h4', {class: {'modal-title': true}}, this.title)
+                h('h3', {class: {'modal-title': true}}, self.title)
               ]),
               h('div', {class: {'modal-body': true}}, [self.$slots.default]),
               h('div', {class: {'modal-footer': true}}, [
-                h('button', {
-                  class: {
-                    'btn': true,
-                    'btn-default': true
-                  },
-                  on: {
-                    click: self.dismiss
-                  }
-                }, 'Close'),
                 h('button', {
                   class: {
                     'btn': true,
@@ -77,7 +68,7 @@ export default {
                   on: {
                     click: self.close
                   }
-                }, 'OK')
+                }, self.confirmationLabel)
               ])
             ])
           ])
@@ -91,6 +82,10 @@ export default {
         title: {
           type: String,
           required: true
+        },
+        confirmationLabel: {
+          type: String,
+          required: true
         }
       },
       methods: {
@@ -101,14 +96,21 @@ export default {
           modals.emit('dismiss', this.id)
         }
       },
+      beforeCreate () {
+        modals.on('open', () => {
+          this.$forceUpdate()
+        })
+      },
       mounted () {
-        const input = $(this.$el).find('.modal-wrapper').first()
+        const input = $(this.$el).find('.modal-dialog').first()
         const onClick = (event) => {
           if (!input.is(event.target) && input.has(event.target).length === 0) {
             this.close()
           }
         }
-        $(document).one('click', onClick)
+        setTimeout(() => {
+          $(document).on('click', onClick)
+        }, 0)
         this._unsubscribe = () => {
           $(document).off('click', onClick)
         }
@@ -123,15 +125,22 @@ export default {
      */
     Vue.component('modal-view', {
       render (h) {
-        return h('div', null, map(({id, title, Modal, data}) => h(ModalWrapper, {
-          attrs: {id},
-          props: {title}
-        }, [
-          h(Modal, {props: data})
-        ]))(this.modals))
+        return h('div', null, map(({id, title, confirmationLabel, Modal, data}) => {
+          return h(ModalWrapper, {
+            attrs: {id},
+            props: {title, confirmationLabel}
+          }, [
+            h(Modal, {props: data})
+          ])
+        })(this.modals))
       },
-      computed: {
-        modals: () => flow(map((item) => last(item)), without([undefined, null]))(stack)
+      data () {
+        return {modal: this.getModals()}
+      },
+      methods: {
+        getModals () {
+          return fromPairs(stack)
+        }
       },
       /**
        * register listeners to add/remove Modals and corresponding data
@@ -146,17 +155,20 @@ export default {
               stack[index][1].reject()
             }
             stack.splice(index, 1)
+            this.modals = this.getModals()
             this.$forceUpdate()
           }
         }
         const onKeydown = (event) => {
           if (event.keyCode == 27) { // eslint-disable-line eqeqeq
-            const id = last(stack)[0]
-            modals.emit('dismiss', id)
+            try {
+              const id = last(stack)[0]
+              modals.emit('dismiss', id)
+            } catch (e) {}
           }
         }
-        modals.on('open', (event) => {
-          stack.push([event.id, event])
+        modals.on('open', () => {
+          this.modals = this.getModals()
           this.$forceUpdate()
         })
         modals.on('close', onDestroy('close'))
@@ -178,12 +190,14 @@ export default {
      * @param {object} options.data - data to pass into the modal instance
      * @param {function} options.modal - async require
      * @param {string} options.title - modal title
+     * @param {string} options.confirmationLabel - label for confirmation button
      */
-    Vue.prototype.$openModal = function ({title = '', data = {}, modal}) {
+    Vue.prototype.$openModal = function ({title = '', confirmationLabel = 'okay', data = {}, modal}) {
       return Q.Promise((resolve, reject) => {
         modal((Modal) => {
           const id = hash({Modal, data})
-          modals.emit('open', {id, title, Modal, data, resolve, reject})
+          stack.push([id, {id, title, confirmationLabel, Modal, data, resolve, reject}])
+          modals.emit('open', id)
         })
       })
     }

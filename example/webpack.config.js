@@ -12,7 +12,6 @@ module.exports = {
   },
   module: {
     loaders: [
-      {test: /\.css$/, loader: 'style!css'},
       {
         test: /\.js$/,
         loaders: ['babel-loader'],
@@ -23,7 +22,7 @@ module.exports = {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
-      title: 'vue-modal-redux',
+      title: '@citygro/vue-modal',
       template: 'example/index.html',
       inject: 'body',
       xhtml: true

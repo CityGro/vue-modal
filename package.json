@@ -73,7 +73,7 @@
     "pretest": "rimraf dist es lib",
     "lint": "eslint src",
     "test": "jest",
-    "example": "cross-env BABEL_ENV=test webpack-dev-server --config example/webpack.config.js",
+    "start": "cross-env BABEL_ENV=test webpack-dev-server --config example/webpack.config.js",
     "check": "npm run lint && npm run test",
     "compile": "rimraf lib && cross-env BABEL_ENV=cjs babel -d lib/ src/",
     "build:umd:dev": "cross-env BABEL_ENV=cjs webpack src/index.js --config webpack.config.dev.js",

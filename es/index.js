@@ -1,11 +1,10 @@
 import map from 'lodash/fp/map';
-import without from 'lodash/fp/without';
 import first from 'lodash/fp/first';
 import last from 'lodash/fp/last';
-import flow from 'lodash/fp/flow';
 import hash from 'object-hash';
 import findIndex from 'lodash/fp/findIndex';
 import EventEmmitter from 'events';
+import fromPairs from 'lodash/fp/fromPairs';
 import $ from 'jquery';
 import Q from 'q';
 
@@ -22,7 +21,8 @@ export default {
         var self = this;
         return h('div', {
           class: {
-            modal: true
+            modal: true,
+            show: true
           }
         }, [h('div', {
           class: {
@@ -49,15 +49,7 @@ export default {
           on: {
             click: self.dismiss
           }
-        }, '×')]), h('h4', { class: { 'modal-title': true } }, this.title)]), h('div', { class: { 'modal-body': true } }, [self.$slots.default]), h('div', { class: { 'modal-footer': true } }, [h('button', {
-          class: {
-            'btn': true,
-            'btn-default': true
-          },
-          on: {
-            click: self.dismiss
-          }
-        }, 'Close'), h('button', {
+        }, '×')]), h('h3', { class: { 'modal-title': true } }, self.title)]), h('div', { class: { 'modal-body': true } }, [self.$slots.default]), h('div', { class: { 'modal-footer': true } }, [h('button', {
           class: {
             'btn': true,
             'btn-primary': true
@@ -65,7 +57,7 @@ export default {
           on: {
             click: self.close
           }
-        }, 'OK')])])])]);
+        }, self.confirmationLabel)])])])]);
       },
 
       props: {
@@ -74,6 +66,10 @@ export default {
           required: true
         },
         title: {
+          type: String,
+          required: true
+        },
+        confirmationLabel: {
           type: String,
           required: true
         }
@@ -86,16 +82,25 @@ export default {
           modals.emit('dismiss', this.id);
         }
       },
-      mounted: function mounted() {
+      beforeCreate: function beforeCreate() {
         var _this = this;
 
-        var input = $(this.$el).find('.modal-wrapper').first();
+        modals.on('open', function () {
+          _this.$forceUpdate();
+        });
+      },
+      mounted: function mounted() {
+        var _this2 = this;
+
+        var input = $(this.$el).find('.modal-dialog').first();
         var onClick = function onClick(event) {
           if (!input.is(event.target) && input.has(event.target).length === 0) {
-            _this.close();
+            _this2.close();
           }
         };
-        $(document).one('click', onClick);
+        setTimeout(function () {
+          $(document).on('click', onClick);
+        }, 0);
         this._unsubscribe = function () {
           $(document).off('click', onClick);
         };
@@ -113,27 +118,30 @@ export default {
         return h('div', null, map(function (_ref) {
           var id = _ref.id,
               title = _ref.title,
+              confirmationLabel = _ref.confirmationLabel,
               Modal = _ref.Modal,
               data = _ref.data;
+
           return h(ModalWrapper, {
             attrs: { id: id },
-            props: { title: title }
+            props: { title: title, confirmationLabel: confirmationLabel }
           }, [h(Modal, { props: data })]);
         })(this.modals));
       },
+      data: function data() {
+        return { modal: this.getModals() };
+      },
 
-      computed: {
-        modals: function modals() {
-          return flow(map(function (item) {
-            return last(item);
-          }), without([undefined, null]))(stack);
+      methods: {
+        getModals: function getModals() {
+          return fromPairs(stack);
         }
       },
       /**
        * register listeners to add/remove Modals and corresponding data
        */
       beforeCreate: function beforeCreate() {
-        var _this2 = this;
+        var _this3 = this;
 
         var onDestroy = function onDestroy(method) {
           return function (id) {
@@ -147,20 +155,23 @@ export default {
                 stack[index][1].reject();
               }
               stack.splice(index, 1);
-              _this2.$forceUpdate();
+              _this3.modals = _this3.getModals();
+              _this3.$forceUpdate();
             }
           };
         };
         var onKeydown = function onKeydown(event) {
           if (event.keyCode == 27) {
             // eslint-disable-line eqeqeq
-            var id = last(stack)[0];
-            modals.emit('dismiss', id);
+            try {
+              var id = last(stack)[0];
+              modals.emit('dismiss', id);
+            } catch (e) {}
           }
         };
-        modals.on('open', function (event) {
-          stack.push([event.id, event]);
-          _this2.$forceUpdate();
+        modals.on('open', function () {
+          _this3.modals = _this3.getModals();
+          _this3.$forceUpdate();
         });
         modals.on('close', onDestroy('close'));
         modals.on('dismiss', onDestroy('dismiss'));
@@ -181,10 +192,13 @@ export default {
      * @param {object} options.data - data to pass into the modal instance
      * @param {function} options.modal - async require
      * @param {string} options.title - modal title
+     * @param {string} options.confirmationLabel - label for confirmation button
      */
     Vue.prototype.$openModal = function (_ref2) {
       var _ref2$title = _ref2.title,
           title = _ref2$title === undefined ? '' : _ref2$title,
+          _ref2$confirmationLab = _ref2.confirmationLabel,
+          confirmationLabel = _ref2$confirmationLab === undefined ? 'okay' : _ref2$confirmationLab,
           _ref2$data = _ref2.data,
           data = _ref2$data === undefined ? {} : _ref2$data,
           modal = _ref2.modal;
@@ -192,7 +206,8 @@ export default {
       return Q.Promise(function (resolve, reject) {
         modal(function (Modal) {
           var id = hash({ Modal: Modal, data: data });
-          modals.emit('open', { id: id, title: title, Modal: Modal, data: data, resolve: resolve, reject: reject });
+          stack.push([id, { id: id, title: title, confirmationLabel: confirmationLabel, Modal: Modal, data: data, resolve: resolve, reject: reject }]);
+          modals.emit('open', id);
         });
       });
     };

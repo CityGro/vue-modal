@@ -28,13 +28,14 @@ export default {
           class: {
             'modal-dialog': true,
             'modal-lg': self.size === 'lg',
-            'modal-sm': self.size === 'sm'
+            'modal-sm': self.size === 'sm',
+            'modal-full': self.size === 'full'
           }
         }, [h('div', {
           class: {
             'modal-content': true
           }
-        }, [h('div', {
+        }, self.ignoreScaffolding ? [self.$slots.default] : [h('div', {
           class: {
             'modal-header': true
           }
@@ -77,6 +78,10 @@ export default {
         },
         size: {
           type: String
+        },
+        ignoreScaffolding: {
+          type: Boolean,
+          default: false
         }
       },
       methods: {
@@ -124,13 +129,14 @@ export default {
           var id = _ref.id,
               title = _ref.title,
               confirmationLabel = _ref.confirmationLabel,
+              ignoreScaffolding = _ref.ignoreScaffolding,
               size = _ref.size,
               Modal = _ref.Modal,
               data = _ref.data;
 
           return h(ModalWrapper, {
             attrs: { id: id },
-            props: { title: title, confirmationLabel: confirmationLabel, size: size }
+            props: { title: title, confirmationLabel: confirmationLabel, size: size, ignoreScaffolding: ignoreScaffolding }
           }, [h(Modal, { props: data })]);
         })(this.modals));
       },
@@ -199,6 +205,7 @@ export default {
      * @param {function} options.modal - async require
      * @param {string} options.title - modal title
      * @param {string} options.confirmationLabel - label for confirmation button
+     * @param {boolean} options.ignoreScaffolding - do not include header or footer elements
      */
     Vue.prototype.$openModal = function (_ref2) {
       var _ref2$title = _ref2.title,
@@ -207,16 +214,27 @@ export default {
           confirmationLabel = _ref2$confirmationLab === undefined ? 'okay' : _ref2$confirmationLab,
           _ref2$size = _ref2.size,
           size = _ref2$size === undefined ? '' : _ref2$size,
+          _ref2$ignoreScaffoldi = _ref2.ignoreScaffolding,
+          ignoreScaffolding = _ref2$ignoreScaffoldi === undefined ? false : _ref2$ignoreScaffoldi,
           _ref2$data = _ref2.data,
           data = _ref2$data === undefined ? {} : _ref2$data,
           modal = _ref2.modal;
 
       return Q.Promise(function (resolve, reject) {
-        modal(function (Modal) {
-          var id = hash({ Modal: Modal, data: data });
-          stack.push([id, { id: id, title: title, confirmationLabel: confirmationLabel, size: size, Modal: Modal, data: data, resolve: resolve, reject: reject }]);
-          modals.emit('open', id);
-        });
+        try {
+          modal(function (Modal) {
+            var id = hash({ Modal: Modal, data: data });
+            resolve({
+              modal: Modal,
+              result: Q.Promise(function (resolve, reject) {
+                stack.push([id, { id: id, title: title, confirmationLabel: confirmationLabel, size: size, ignoreScaffolding: ignoreScaffolding, Modal: Modal, data: data, resolve: resolve, reject: reject }]);
+                modals.emit('open', id);
+              })
+            });
+          });
+        } catch (e) {
+          reject(e);
+        }
       });
     };
   }

@@ -29,14 +29,15 @@ export default {
             class: {
               'modal-dialog': true,
               'modal-lg': self.size === 'lg',
-              'modal-sm': self.size === 'sm'
+              'modal-sm': self.size === 'sm',
+              'modal-full': self.size === 'full'
             }
           }, [
             h('div', {
               class: {
                 'modal-content': true
               }
-            }, [
+            }, (self.ignoreScaffolding) ? [self.$slots.default] : [
               h('div', {
                 class: {
                   'modal-header': true
@@ -91,6 +92,10 @@ export default {
         },
         size: {
           type: String
+        },
+        ignoreScaffolding: {
+          type: Boolean,
+          default: false
         }
       },
       methods: {
@@ -130,10 +135,10 @@ export default {
      */
     Vue.component('modal-view', {
       render (h) {
-        return h('div', null, map(({id, title, confirmationLabel, size, Modal, data}) => {
+        return h('div', null, map(({id, title, confirmationLabel, ignoreScaffolding, size, Modal, data}) => {
           return h(ModalWrapper, {
             attrs: {id},
-            props: {title, confirmationLabel, size}
+            props: {title, confirmationLabel, size, ignoreScaffolding}
           }, [
             h(Modal, {props: data})
           ])
@@ -196,14 +201,31 @@ export default {
      * @param {function} options.modal - async require
      * @param {string} options.title - modal title
      * @param {string} options.confirmationLabel - label for confirmation button
+     * @param {boolean} options.ignoreScaffolding - do not include header or footer elements
      */
-    Vue.prototype.$openModal = function ({title = '', confirmationLabel = 'okay', size = '', data = {}, modal}) {
+    Vue.prototype.$openModal = function ({
+      title = '',
+      confirmationLabel = 'okay',
+      size = '',
+      ignoreScaffolding = false,
+      data = {},
+      modal
+    }) {
       return Q.Promise((resolve, reject) => {
-        modal((Modal) => {
-          const id = hash({Modal, data})
-          stack.push([id, {id, title, confirmationLabel, size, Modal, data, resolve, reject}])
-          modals.emit('open', id)
-        })
+        try {
+          modal((Modal) => {
+            const id = hash({Modal, data})
+            resolve({
+              modal: Modal,
+              result: Q.Promise((resolve, reject) => {
+                stack.push([id, {id, title, confirmationLabel, size, ignoreScaffolding, Modal, data, resolve, reject}])
+                modals.emit('open', id)
+              })
+            })
+          })
+        } catch (e) {
+          reject(e)
+        }
       })
     }
   }

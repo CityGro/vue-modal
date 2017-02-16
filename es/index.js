@@ -26,7 +26,9 @@ export default {
           }
         }, [h('div', {
           class: {
-            'modal-dialog': true
+            'modal-dialog': true,
+            'modal-lg': self.size === 'lg',
+            'modal-sm': self.size === 'sm'
           }
         }, [h('div', {
           class: {
@@ -72,6 +74,9 @@ export default {
         confirmationLabel: {
           type: String,
           required: true
+        },
+        size: {
+          type: String
         }
       },
       methods: {
@@ -119,12 +124,13 @@ export default {
           var id = _ref.id,
               title = _ref.title,
               confirmationLabel = _ref.confirmationLabel,
+              size = _ref.size,
               Modal = _ref.Modal,
               data = _ref.data;
 
           return h(ModalWrapper, {
             attrs: { id: id },
-            props: { title: title, confirmationLabel: confirmationLabel }
+            props: { title: title, confirmationLabel: confirmationLabel, size: size }
           }, [h(Modal, { props: data })]);
         })(this.modals));
       },
@@ -199,6 +205,8 @@ export default {
           title = _ref2$title === undefined ? '' : _ref2$title,
           _ref2$confirmationLab = _ref2.confirmationLabel,
           confirmationLabel = _ref2$confirmationLab === undefined ? 'okay' : _ref2$confirmationLab,
+          _ref2$size = _ref2.size,
+          size = _ref2$size === undefined ? '' : _ref2$size,
           _ref2$data = _ref2.data,
           data = _ref2$data === undefined ? {} : _ref2$data,
           modal = _ref2.modal;
@@ -206,7 +214,7 @@ export default {
       return Q.Promise(function (resolve, reject) {
         modal(function (Modal) {
           var id = hash({ Modal: Modal, data: data });
-          stack.push([id, { id: id, title: title, confirmationLabel: confirmationLabel, Modal: Modal, data: data, resolve: resolve, reject: reject }]);
+          stack.push([id, { id: id, title: title, confirmationLabel: confirmationLabel, size: size, Modal: Modal, data: data, resolve: resolve, reject: reject }]);
           modals.emit('open', id);
         });
       });

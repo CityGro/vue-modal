@@ -27,7 +27,9 @@ export default {
         }, [
           h('div', {
             class: {
-              'modal-dialog': true
+              'modal-dialog': true,
+              'modal-lg': self.size === 'lg',
+              'modal-sm': self.size === 'sm'
             }
           }, [
             h('div', {
@@ -86,6 +88,9 @@ export default {
         confirmationLabel: {
           type: String,
           required: true
+        },
+        size: {
+          type: String
         }
       },
       methods: {
@@ -125,10 +130,10 @@ export default {
      */
     Vue.component('modal-view', {
       render (h) {
-        return h('div', null, map(({id, title, confirmationLabel, Modal, data}) => {
+        return h('div', null, map(({id, title, confirmationLabel, size, Modal, data}) => {
           return h(ModalWrapper, {
             attrs: {id},
-            props: {title, confirmationLabel}
+            props: {title, confirmationLabel, size}
           }, [
             h(Modal, {props: data})
           ])
@@ -192,11 +197,11 @@ export default {
      * @param {string} options.title - modal title
      * @param {string} options.confirmationLabel - label for confirmation button
      */
-    Vue.prototype.$openModal = function ({title = '', confirmationLabel = 'okay', data = {}, modal}) {
+    Vue.prototype.$openModal = function ({title = '', confirmationLabel = 'okay', size = '', data = {}, modal}) {
       return Q.Promise((resolve, reject) => {
         modal((Modal) => {
           const id = hash({Modal, data})
-          stack.push([id, {id, title, confirmationLabel, Modal, data, resolve, reject}])
+          stack.push([id, {id, title, confirmationLabel, size, Modal, data, resolve, reject}])
           modals.emit('open', id)
         })
       })

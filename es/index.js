@@ -265,8 +265,10 @@ export default {
      * @param {string} options.title - modal title
      */
     Vue.prototype.$openModal = function (_ref2) {
+      var _this3 = this;
+
       var _ref2$confirmationLab = _ref2.confirmationLabel,
-          confirmationLabel = _ref2$confirmationLab === undefined ? 'okay' : _ref2$confirmationLab,
+          confirmationLabel = _ref2$confirmationLab === undefined ? 'ok' : _ref2$confirmationLab,
           _ref2$data = _ref2.data,
           data = _ref2$data === undefined ? {} : _ref2$data,
           _ref2$ignoreScaffoldi = _ref2.ignoreScaffolding,
@@ -277,29 +279,40 @@ export default {
           _ref2$title = _ref2.title,
           title = _ref2$title === undefined ? '' : _ref2$title;
 
-      return Q.Promise(function (resolve, reject, notify) {
-        var status = { loading: true };
-        var poll = setInterval(function () {
-          notify(status);
-          modals.emit('progress', status.loading);
-        }, 100);
-        try {
-          modal(function (Modal) {
-            status.loading = false;
-            var id = hash({ Modal: Modal, data: data });
-            resolve({
-              modal: Modal,
-              result: Q.Promise(function (resolve, reject) {
-                stack.push([id, { id: id, title: title, confirmationLabel: confirmationLabel, size: size, ignoreScaffolding: ignoreScaffolding, Modal: Modal, data: data, resolve: resolve, reject: reject }]);
-                modals.emit('open', id);
-                clearInterval(poll);
-              })
+      var result = Q.defer();
+      var status = { loading: true };
+      var poll = setInterval(function () {
+        modals.emit('progress', status.loading);
+      }, 100);
+      return {
+        result: result.promise,
+        mounted: Q.Promise(function (resolve, reject) {
+          try {
+            modal(function (Modal) {
+              status.loading = false;
+              var id = hash({ Modal: Modal, data: data });
+              stack.push([id, {
+                id: id,
+                title: title,
+                confirmationLabel: confirmationLabel,
+                size: size,
+                ignoreScaffolding: ignoreScaffolding,
+                Modal: Modal,
+                data: data,
+                resolve: result.resolve,
+                reject: result.reject
+              }]);
+              modals.emit('open', id);
+              clearInterval(poll);
+              _this3.$nextTick(function () {
+                resolve(Modal);
+              });
             });
-          });
-        } catch (e) {
-          reject(e);
-        }
-      });
+          } catch (e) {
+            reject(e);
+          }
+        })
+      };
     };
   }
 };

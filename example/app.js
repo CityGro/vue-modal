@@ -52,13 +52,14 @@ new Vue({
           },
           on: {
             click: () => {
-              this.$openModal({
+              const {result, mounted} = this.$openModal({
                 modal: (cb) => cb(MyContent),
                 title: 'My Content',
-              }).then(({modal, result}) => {
+              })
+              result.then(console.log).catch(console.error)
+              mounted.then((modal) => {
                 console.log(modal)
-                return result
-              }).then(console.log).catch(console.error)
+              })
             }
           }
         }, 'open modal'),
@@ -73,7 +74,7 @@ new Vue({
                 modal: (cb) => cb(MyContent),
                 title: 'My Small Content',
                 size: 'sm'
-              }).then(console.log).catch(console.error)
+              })
             }
           }
         }, 'open small modal'),
@@ -88,7 +89,7 @@ new Vue({
                 modal: (cb) => cb(MyContent),
                 title: 'My Large Content',
                 size: 'lg'
-              }).then(console.log).catch(console.error)
+              })
             }
           }
         }, 'open large modal'),
@@ -103,7 +104,7 @@ new Vue({
                 modal: (cb) => cb(MyCustomContent),
                 size: 'lg',
                 ignoreScaffolding: true
-              }).then(console.log).catch(console.error)
+              })
             }
           }
         }, 'open custom modal')

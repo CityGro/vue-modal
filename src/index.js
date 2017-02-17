@@ -267,36 +267,47 @@ export default {
      * @param {string} options.title - modal title
      */
     Vue.prototype.$openModal = function ({
-      confirmationLabel = 'okay',
+      confirmationLabel = 'ok',
       data = {},
       ignoreScaffolding = false,
       modal,
       size = '',
       title = ''
     }) {
-      return Q.Promise((resolve, reject, notify) => {
-        let status = {loading: true}
-        const poll = setInterval(() => {
-          notify(status)
-          modals.emit('progress', status.loading)
-        }, 100)
-        try {
-          modal((Modal) => {
-            status.loading = false
-            const id = hash({Modal, data})
-            resolve({
-              modal: Modal,
-              result: Q.Promise((resolve, reject) => {
-                stack.push([id, {id, title, confirmationLabel, size, ignoreScaffolding, Modal, data, resolve, reject}])
-                modals.emit('open', id)
-                clearInterval(poll)
+      const result = Q.defer()
+      let status = {loading: true}
+      const poll = setInterval(() => {
+        modals.emit('progress', status.loading)
+      }, 100)
+      return {
+        result: result.promise,
+        mounted: Q.Promise((resolve, reject) => {
+          try {
+            modal((Modal) => {
+              status.loading = false
+              const id = hash({Modal, data})
+              stack.push([id, {
+                id,
+                title,
+                confirmationLabel,
+                size,
+                ignoreScaffolding,
+                Modal,
+                data,
+                resolve: result.resolve,
+                reject: result.reject
+              }])
+              modals.emit('open', id)
+              clearInterval(poll)
+              this.$nextTick(() => {
+                resolve(Modal)
               })
             })
-          })
-        } catch (e) {
-          reject(e)
-        }
-      })
+          } catch (e) {
+            reject(e)
+          }
+        })
+      }
     }
   }
 }

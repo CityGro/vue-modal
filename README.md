@@ -9,7 +9,6 @@ see `./example` for a working demonstration
 // App.vue
 import Vue from 'vue'
 import VueModal from 'vue-modal'
-import noop from 'lodash/noop'
 
 Vue.use(VueModal)
 
@@ -17,16 +16,21 @@ Vue.component('my-component', {
   // ...
   methods: {
     showMyModal () {
-      this.$openModal({
+      const {result, mounted} = this.$openModal({
         modal: (resolve) => require(['Modal'], resolve),
         data: { /* props go here */ },
         title: 'My Title',
         confirmationLabel: 'okay',
         ignoreScaffolding: false // inject your component into the default modal
-      }).then(({modal: VueComponent, result: Promise}, noop, ({loading}) => this.loading = loading) => {
-        setTimeout(() => modal.$parent.close(), 10000) // close after 10s
-        return result
-      }).then(() => console.log('close')).catch(() => console.error('dismiss'))
+      })
+      result.then(() => {
+        /* close */
+      }).catch(() => {
+        /* dismiss */
+      })
+      mounted.then((modal) => {
+        /* do what you want */
+      })
     }
   }
   // ...
@@ -45,7 +49,7 @@ new Vue({
 
 ## api
 
-### `$openModal({confirmationLabel: String, data: Object, ignoreScaffolding: Boolean, modal: (resolve: VueComponent) => void, size: String, title: String}): Promise`
+### `$openModal({confirmationLabel: String, data: Object, ignoreScaffolding: Boolean, modal: (resolve: VueComponent) => void, size: String, title: String}): {result: Promise, mounted: Promise}`
 
 #### options
 
@@ -56,14 +60,10 @@ new Vue({
 - `size: String` (optional) specify modal size (one of: `'sm'`, `'lg'`, or `'full'`)
 - `title: String` modal title, default: `''`
 
-#### return `Promise<{modal: VueComponent, result: Promise}, Error, ({loading: Boolean}) => void>`
+#### return `{result: Promise<void, Error>, mounted: Promise<VueComponent, Error>`
 
-- `modal: VueComponent` the loaded modal component
-- `result: Promise` a `Promise` that is resolved (close) or rejected (dismiss) depending on user input
-
-`@citygro/vue-modal` uses `Q.Promise` to handle async actions. in addition to the standard `onFulfilled` and `onRejected`
-callbacks, you can listen for `onProgress` calls and receive notifications about the loading state of the component in
-question.
+- `mounted: Promise<VueComponent, Error>` a promise for the modal component
+- `result: Promise<void, Error>` a `Promise` that is resolved (close) or rejected (dismiss) depending on user input
 
 ### `vm.$parent.close()`
 

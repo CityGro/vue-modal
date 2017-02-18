@@ -8,126 +8,13 @@ import fromPairs from 'lodash/fp/fromPairs'
 import $ from 'jquery'
 import Q from 'q'
 
+import ModalWrapper from './Modal'
+import {resolveContent} from './utils'
+
 export default {
   install (Vue) {
     const modals = new EventEmmitter()
     let stack = []
-    /**
-     * style this component! use bootstrap 3 modal classes
-     * @function
-     */
-    const ModalWrapper = Vue.component('modal-wrapper', {
-      render (h) {
-        const self = this
-        return h('div', {
-          class: {
-            modal: true,
-            show: true
-          }
-        }, [
-          h('div', {
-            class: {
-              'modal-dialog': true,
-              'modal-lg': self.size === 'lg',
-              'modal-sm': self.size === 'sm',
-              'modal-full': self.size === 'full'
-            }
-          }, [
-            h('div', {
-              class: {
-                'modal-content': true
-              }
-            }, (self.ignoreScaffolding) ? [self.$slots.default] : [
-              h('div', {
-                class: {
-                  'modal-header': true
-                }
-              }, [
-                h('button', {
-                  class: {'close': true},
-                  attrs: {
-                    'type': 'button',
-                    'aria-label': 'Close'
-                  }
-                }, [
-                  h('span', {
-                    attrs: {
-                      'aria-hidden': true
-                    },
-                    on: {
-                      click: self.dismiss
-                    }
-                  }, '×')
-                ]),
-                h('h3', {class: {'modal-title': true}}, self.title)
-              ]),
-              h('div', {class: {'modal-body': true}}, [self.$slots.default]),
-              h('div', {class: {'modal-footer': true}}, [
-                h('button', {
-                  class: {
-                    'btn': true,
-                    'btn-primary': true
-                  },
-                  on: {
-                    click: self.close
-                  }
-                }, self.confirmationLabel)
-              ])
-            ])
-          ])
-        ])
-      },
-      props: {
-        id: {
-          type: String,
-          required: true
-        },
-        title: {
-          type: String,
-          required: true
-        },
-        confirmationLabel: {
-          type: String,
-          required: true
-        },
-        size: {
-          type: String
-        },
-        ignoreScaffolding: {
-          type: Boolean,
-          default: false
-        }
-      },
-      methods: {
-        close () {
-          modals.emit('close', this.id)
-        },
-        dismiss () {
-          modals.emit('dismiss', this.id)
-        }
-      },
-      mounted () {
-        const input = $(this.$el).find('.modal-dialog').first()
-        /**
-         *
-         * @param event
-         */
-        const onClick = (event) => {
-          if (!input.is(event.target) && input.has(event.target).length === 0) {
-            this.close()
-          }
-        }
-        setTimeout(() => {
-          $(document).on('click', onClick)
-        }, 0)
-        this._unsubscribe = () => {
-          $(document).off('click', onClick)
-        }
-      },
-      beforeDestroy () {
-        this._unsubscribe()
-      }
-    })
     /**
      * place this somewhere in your component hierarchy, modals will render here.
      * @function
@@ -163,12 +50,12 @@ export default {
             })
           ])
         ] : []
-        return h('div', null, overlay.concat(map(({id, title, confirmationLabel, ignoreScaffolding, size, Modal, data}) => {
+        return h('div', null, overlay.concat(map(({id, title, buttons, size, Modal, props}) => {
           return h(ModalWrapper, {
             attrs: {id},
-            props: {title, confirmationLabel, size, ignoreScaffolding}
+            props: {title, buttons, size, modals}
           }, [
-            h(Modal, {props: data})
+            h(Modal, {props: props})
           ])
         })(this.modals)))
       },
@@ -197,13 +84,13 @@ export default {
          *
          * @param method
          */
-        const onDestroy = (method) => (id) => {
+        const onDestroy = (method) => ({id, result}) => {
           const index = findIndex((modal) => first(modal) === id)(stack)
           if (stack[index]) {
             if (method === 'close') {
-              stack[index][1].resolve()
+              stack[index][1].resolve(result)
             } else if (method === 'dismiss') {
-              stack[index][1].reject()
+              stack[index][1].reject(result)
             }
             stack.splice(index, 1)
             this.modals = this.getModals()
@@ -260,40 +147,46 @@ export default {
     })
     /**
      * @param {object} options
-     * @param {boolean} options.ignoreScaffolding - do not include header or footer elements
-     * @param {function} options.modal - async require
-     * @param {object} options.data - data to pass into the modal instance
-     * @param {string} options.confirmationLabel - label for confirmation button
+     * @param {{}[]} options.buttons - define buttons to inject into the footer
+     * @param {string|function|object} options.content - async require
+     * @param {object} options.props - data to pass into the modal instance
      * @param {string} options.title - modal title
+     * @param {string} options.size - modal size (one of 'sm', 'lg', or 'full')
      */
     Vue.prototype.$openModal = function ({
-      confirmationLabel = 'ok',
-      data = {},
-      ignoreScaffolding = false,
-      modal,
+      buttons = true,
+      props = {},
+      content,
       size = '',
-      title = ''
+      title = null
     }) {
+      if (!content) {
+        throw new Error('options.content is a required argument!', content)
+      }
+      if (buttons === true) {
+        buttons = [
+          {label: 'ok', key: 'ok', class: 'btn-primary'}
+        ]
+      }
       const result = Q.defer()
       let status = {loading: true}
       const poll = setInterval(() => {
         modals.emit('progress', status.loading)
-      }, 100)
+      }, 200)
       return {
         result: result.promise,
         mounted: Q.Promise((resolve, reject) => {
           try {
-            modal((Modal) => {
+            resolveContent(content)((Modal) => {
               status.loading = false
-              const id = hash({Modal, data})
+              const id = hash({Modal, props})
               stack.push([id, {
                 id,
                 title,
-                confirmationLabel,
+                buttons,
                 size,
-                ignoreScaffolding,
                 Modal,
-                data,
+                props,
                 resolve: result.resolve,
                 reject: result.reject
               }])

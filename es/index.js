@@ -8,114 +8,13 @@ import fromPairs from 'lodash/fp/fromPairs';
 import $ from 'jquery';
 import Q from 'q';
 
+import ModalWrapper from './Modal';
+import { resolveContent } from './utils';
+
 export default {
   install: function install(Vue) {
     var modals = new EventEmmitter();
     var stack = [];
-    /**
-     * style this component! use bootstrap 3 modal classes
-     * @function
-     */
-    var ModalWrapper = Vue.component('modal-wrapper', {
-      render: function render(h) {
-        var self = this;
-        return h('div', {
-          class: {
-            modal: true,
-            show: true
-          }
-        }, [h('div', {
-          class: {
-            'modal-dialog': true,
-            'modal-lg': self.size === 'lg',
-            'modal-sm': self.size === 'sm',
-            'modal-full': self.size === 'full'
-          }
-        }, [h('div', {
-          class: {
-            'modal-content': true
-          }
-        }, self.ignoreScaffolding ? [self.$slots.default] : [h('div', {
-          class: {
-            'modal-header': true
-          }
-        }, [h('button', {
-          class: { 'close': true },
-          attrs: {
-            'type': 'button',
-            'aria-label': 'Close'
-          }
-        }, [h('span', {
-          attrs: {
-            'aria-hidden': true
-          },
-          on: {
-            click: self.dismiss
-          }
-        }, '×')]), h('h3', { class: { 'modal-title': true } }, self.title)]), h('div', { class: { 'modal-body': true } }, [self.$slots.default]), h('div', { class: { 'modal-footer': true } }, [h('button', {
-          class: {
-            'btn': true,
-            'btn-primary': true
-          },
-          on: {
-            click: self.close
-          }
-        }, self.confirmationLabel)])])])]);
-      },
-
-      props: {
-        id: {
-          type: String,
-          required: true
-        },
-        title: {
-          type: String,
-          required: true
-        },
-        confirmationLabel: {
-          type: String,
-          required: true
-        },
-        size: {
-          type: String
-        },
-        ignoreScaffolding: {
-          type: Boolean,
-          default: false
-        }
-      },
-      methods: {
-        close: function close() {
-          modals.emit('close', this.id);
-        },
-        dismiss: function dismiss() {
-          modals.emit('dismiss', this.id);
-        }
-      },
-      mounted: function mounted() {
-        var _this = this;
-
-        var input = $(this.$el).find('.modal-dialog').first();
-        /**
-         *
-         * @param event
-         */
-        var onClick = function onClick(event) {
-          if (!input.is(event.target) && input.has(event.target).length === 0) {
-            _this.close();
-          }
-        };
-        setTimeout(function () {
-          $(document).on('click', onClick);
-        }, 0);
-        this._unsubscribe = function () {
-          $(document).off('click', onClick);
-        };
-      },
-      beforeDestroy: function beforeDestroy() {
-        this._unsubscribe();
-      }
-    });
     /**
      * place this somewhere in your component hierarchy, modals will render here.
      * @function
@@ -150,16 +49,15 @@ export default {
         return h('div', null, overlay.concat(map(function (_ref) {
           var id = _ref.id,
               title = _ref.title,
-              confirmationLabel = _ref.confirmationLabel,
-              ignoreScaffolding = _ref.ignoreScaffolding,
+              buttons = _ref.buttons,
               size = _ref.size,
               Modal = _ref.Modal,
-              data = _ref.data;
+              props = _ref.props;
 
           return h(ModalWrapper, {
             attrs: { id: id },
-            props: { title: title, confirmationLabel: confirmationLabel, size: size, ignoreScaffolding: ignoreScaffolding }
-          }, [h(Modal, { props: data })]);
+            props: { title: title, buttons: buttons, size: size, modals: modals }
+          }, [h(Modal, { props: props })]);
         })(this.modals)));
       },
 
@@ -185,26 +83,29 @@ export default {
        * register listeners to add/remove Modals and corresponding data
        */
       beforeCreate: function beforeCreate() {
-        var _this2 = this;
+        var _this = this;
 
         /**
          *
          * @param method
          */
         var onDestroy = function onDestroy(method) {
-          return function (id) {
+          return function (_ref2) {
+            var id = _ref2.id,
+                result = _ref2.result;
+
             var index = findIndex(function (modal) {
               return first(modal) === id;
             })(stack);
             if (stack[index]) {
               if (method === 'close') {
-                stack[index][1].resolve();
+                stack[index][1].resolve(result);
               } else if (method === 'dismiss') {
-                stack[index][1].reject();
+                stack[index][1].reject(result);
               }
               stack.splice(index, 1);
-              _this2.modals = _this2.getModals();
-              _this2.$forceUpdate();
+              _this.modals = _this.getModals();
+              _this.$forceUpdate();
             }
           };
         };
@@ -225,13 +126,13 @@ export default {
          * update modal data onOpen
          */
         modals.on('open', function () {
-          _this2.modals = _this2.getModals();
+          _this.modals = _this.getModals();
         });
         /**
          * update loading state
          */
         modals.on('progress', function (loading) {
-          _this2.loading = _this2.loading || loading;
+          _this.loading = _this.loading || loading;
         });
         /**
          * close the modal (resolve)
@@ -258,53 +159,56 @@ export default {
     });
     /**
      * @param {object} options
-     * @param {boolean} options.ignoreScaffolding - do not include header or footer elements
-     * @param {function} options.modal - async require
-     * @param {object} options.data - data to pass into the modal instance
-     * @param {string} options.confirmationLabel - label for confirmation button
+     * @param {{}[]} options.buttons - define buttons to inject into the footer
+     * @param {string|function|object} options.content - async require
+     * @param {object} options.props - data to pass into the modal instance
      * @param {string} options.title - modal title
+     * @param {string} options.size - modal size (one of 'sm', 'lg', or 'full')
      */
-    Vue.prototype.$openModal = function (_ref2) {
-      var _this3 = this;
+    Vue.prototype.$openModal = function (_ref3) {
+      var _this2 = this;
 
-      var _ref2$confirmationLab = _ref2.confirmationLabel,
-          confirmationLabel = _ref2$confirmationLab === undefined ? 'ok' : _ref2$confirmationLab,
-          _ref2$data = _ref2.data,
-          data = _ref2$data === undefined ? {} : _ref2$data,
-          _ref2$ignoreScaffoldi = _ref2.ignoreScaffolding,
-          ignoreScaffolding = _ref2$ignoreScaffoldi === undefined ? false : _ref2$ignoreScaffoldi,
-          modal = _ref2.modal,
-          _ref2$size = _ref2.size,
-          size = _ref2$size === undefined ? '' : _ref2$size,
-          _ref2$title = _ref2.title,
-          title = _ref2$title === undefined ? '' : _ref2$title;
+      var _ref3$buttons = _ref3.buttons,
+          buttons = _ref3$buttons === undefined ? true : _ref3$buttons,
+          _ref3$props = _ref3.props,
+          props = _ref3$props === undefined ? {} : _ref3$props,
+          content = _ref3.content,
+          _ref3$size = _ref3.size,
+          size = _ref3$size === undefined ? '' : _ref3$size,
+          _ref3$title = _ref3.title,
+          title = _ref3$title === undefined ? null : _ref3$title;
 
+      if (!content) {
+        throw new Error('options.content is a required argument!', content);
+      }
+      if (buttons === true) {
+        buttons = [{ label: 'ok', key: 'ok', class: 'btn-primary' }];
+      }
       var result = Q.defer();
       var status = { loading: true };
       var poll = setInterval(function () {
         modals.emit('progress', status.loading);
-      }, 100);
+      }, 200);
       return {
         result: result.promise,
         mounted: Q.Promise(function (resolve, reject) {
           try {
-            modal(function (Modal) {
+            resolveContent(content)(function (Modal) {
               status.loading = false;
-              var id = hash({ Modal: Modal, data: data });
+              var id = hash({ Modal: Modal, props: props });
               stack.push([id, {
                 id: id,
                 title: title,
-                confirmationLabel: confirmationLabel,
+                buttons: buttons,
                 size: size,
-                ignoreScaffolding: ignoreScaffolding,
                 Modal: Modal,
-                data: data,
+                props: props,
                 resolve: result.resolve,
                 reject: result.reject
               }]);
               modals.emit('open', id);
               clearInterval(poll);
-              _this3.$nextTick(function () {
+              _this2.$nextTick(function () {
                 resolve(Modal);
               });
             });

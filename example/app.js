@@ -14,6 +14,9 @@ const MyCustomContent = Vue.component('my-custom-content', {
     const self = this
     return createElement('div', null, [
       createElement('div', {
+        class: {
+          'modal-body': true
+        },
         domProps: {
           innerHTML: '<iframe width="100%" height="450" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/305747293&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></iframe>'
         }
@@ -53,16 +56,24 @@ new Vue({
           on: {
             click: () => {
               const {result, mounted} = this.$openModal({
-                modal: (cb) => cb(MyContent),
+                content: (cb) => cb(MyContent),
                 title: 'My Content',
+                buttons: [
+                  {label: 'Ok', key: 'ok', class: 'btn-primary'},
+                  {label: 'Cancel', key: 'cancel', class: 'btn-default', reject: true}
+                ]
               })
-              result.then(console.log).catch(console.error)
-              mounted.then((modal) => {
-                console.log(modal)
-              })
+              result.then(
+                (res) => console.log('[@citygro/vue-modal] result', res.key)
+              ).catch(
+                (err) => console.error('[@citygro/vue-modal] result', err.key)
+              )
+              mounted.then((content) => {
+                console.log('[@citygro/vue-modal] mounted', content)
+              }).catch(console.error)
             }
           }
-        }, 'open modal'),
+        }, 'open content'),
         createElement('a', {
           class: {
             'btn': true,
@@ -71,13 +82,13 @@ new Vue({
           on: {
             click: () => {
               this.$openModal({
-                modal: (cb) => cb(MyContent),
+                content: 'This is the beginning of the song',
                 title: 'My Small Content',
                 size: 'sm'
               })
             }
           }
-        }, 'open small modal'),
+        }, 'open small content'),
         createElement('a', {
           class: {
             'btn': true,
@@ -86,13 +97,13 @@ new Vue({
           on: {
             click: () => {
               this.$openModal({
-                modal: (cb) => cb(MyContent),
+                content: (cb) => cb(MyContent),
                 title: 'My Large Content',
                 size: 'lg'
               })
             }
           }
-        }, 'open large modal'),
+        }, 'open large content'),
         createElement('a', {
           class: {
             'btn': true,
@@ -101,13 +112,13 @@ new Vue({
           on: {
             click: () => {
               this.$openModal({
-                modal: (cb) => cb(MyCustomContent),
+                content: MyCustomContent,
                 size: 'lg',
-                ignoreScaffolding: true
+                buttons: false
               })
             }
           }
-        }, 'open custom modal')
+        }, 'open custom content')
       ]),
       createElement('modal-view')
     ])

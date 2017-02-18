@@ -17,11 +17,9 @@ Vue.component('my-component', {
   methods: {
     showMyModal () {
       const {result, mounted} = this.$openModal({
-        modal: (resolve) => require(['Modal'], resolve),
-        data: { /* props go here */ },
-        title: 'My Title',
-        confirmationLabel: 'okay',
-        ignoreScaffolding: false // inject your component into the default modal
+        content: (resolve) => require(['Modal'], resolve),
+        props: { /* props go here */ },
+        title: 'My Title'
       })
       result.then(() => {
         /* close */
@@ -49,26 +47,47 @@ new Vue({
 
 ## api
 
-### `$openModal({confirmationLabel: String, data: Object, ignoreScaffolding: Boolean, modal: (resolve: VueComponent) => void, size: String, title: String}): {result: Promise, mounted: Promise}`
+### `$openModal(options: Object): {result: Promise, mounted: Promise}`
 
 #### options
 
-- `confirmationLabel` label for the confirmation button, default: `'okay'`
-- `data: Object` props to be passed to the `VueComponent` after it is loaded, default: `{}`
-- `ignoreScaffolding: Boolean` inject the `VueComponent` into an empty modal, default: `false`
-- `modal: Function` takes a callback function that returns a `VueComponent`, this can be used to load modals asynchronously
+- `props: Object` props to be passed to the `VueComponent` after it is loaded, default: `{}`
+- `content` takes one of
+  - a callback function that returns a `VueComponent`, this can be used to load modals asynchronously
+  - a `VueComponent` instance
+  - a `String`
 - `size: String` (optional) specify modal size (one of: `'sm'`, `'lg'`, or `'full'`)
-- `title: String` modal title, default: `''`
+- `title: String` modal title, default: `null`
+- `buttons: Object[]` an array of objects describing buttons:
+
+```js
+[
+  {label: 'Ok', key: 'ok', class: 'btn-primary'},
+  {label: 'Cancel', key: 'cancel', class: 'btn-default', reject: true}
+]
+```
+
+`content` is wrapped in `div.modal-body` if either `title` or `buttons` is defined, if neither are present `content`
+ is injected directly into `div.modal-dialog`.
 
 #### return `{result: Promise<void, Error>, mounted: Promise<VueComponent, Error>`
 
 - `mounted: Promise<VueComponent, Error>` a promise for the modal component
 - `result: Promise<void, Error>` a `Promise` that is resolved (close) or rejected (dismiss) depending on user input
 
-### `vm.$parent.close()`
+### `content.$parent.close()`
 
-close this modal (and resolve `result`)
+> note that `$parent` refers to the modal itself, *not* the component calling `$openModal()`
 
-### `vm.$parent.dismiss()`
+close this modal (and resolve `result`).
+
+### `content.$parent.dismiss()`
+
+> note that `$parent` refers to the modal itself, *not* the component calling `$openModal()`
 
 dismiss this modal (and reject `result`)
+
+## custom styles
+
+modal components have bootstrap modal classes
+

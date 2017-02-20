@@ -51,7 +51,11 @@ export default {
             'margin-top': '25%'
           }
         })])] : [];
-        return h('div', null, overlay.concat(map(function (_ref) {
+        return h('div', {
+          class: {
+            'modal-view': true
+          }
+        }, overlay.concat(map(function (_ref) {
           var id = _ref.id,
               title = _ref.title,
               buttons = _ref.buttons,

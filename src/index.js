@@ -55,7 +55,11 @@ export default {
             })
           ])
         ] : []
-        return h('div', null, overlay.concat(map(({id, title, buttons, size, Modal, props, static: isStatic}) => {
+        return h('div', {
+          class: {
+            'modal-view': true
+          }
+        }, overlay.concat(map(({id, title, buttons, size, Modal, props, static: isStatic}) => {
           return h(ModalWrapper, {
             attrs: {id},
             props: {title, buttons, size, modals, static: isStatic}

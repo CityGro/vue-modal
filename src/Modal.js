@@ -119,15 +119,16 @@ export default Vue.component('cg-modal', {
           }
         }
       }, [
-        h('div', {
-          class: {
-            'modal-content': true
-          }
-        }, (header || footer) ? [
-          header,
-          h('div', {class: {'modal-body': true}}, [self.$slots.default]),
-          footer
-        ] : self.$slots.default)
+        (header || footer)
+          ? h('div', {
+            class: {
+              'modal-content': true
+            }
+          }, [
+            header,
+            h('div', {class: {'modal-body': true}}, [self.$slots.default]),
+            footer
+          ]) : self.$slots.default
       ])
     ])
   }

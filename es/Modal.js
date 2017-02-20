@@ -115,10 +115,10 @@ export default Vue.component('cg-modal', {
           event.stopPropagation();
         }
       }
-    }, [h('div', {
+    }, [header || footer ? h('div', {
       class: {
         'modal-content': true
       }
-    }, header || footer ? [header, h('div', { class: { 'modal-body': true } }, [self.$slots.default]), footer] : self.$slots.default)])]);
+    }, [header, h('div', { class: { 'modal-body': true } }, [self.$slots.default]), footer]) : self.$slots.default])]);
   }
 });

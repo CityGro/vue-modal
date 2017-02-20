@@ -28,6 +28,7 @@
   "repository": "gitlab.com:citygro/vue-modal-redux.git",
   "author": "carlos killpack <carlos@citygro.com>",
   "license": "Apache-2.0",
+  "keywords": ["vue2", "bootstrap", "modal", "component", "vue"],
   "eslintConfig": {
     "parser": "babel-eslint",
     "parserOptions": {

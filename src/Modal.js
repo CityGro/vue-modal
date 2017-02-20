@@ -110,7 +110,8 @@ export default Vue.component('cg-modal', {
           'modal-dialog': true,
           'modal-lg': self.size === 'lg',
           'modal-sm': self.size === 'sm',
-          'modal-full': self.size === 'full'
+          'modal-full': self.size === 'full',
+          'modal-tall': self.size === 'tall'
         },
         on: {
           click (event) {

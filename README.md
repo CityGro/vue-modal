@@ -51,21 +51,22 @@ new Vue({
 
 #### options
 
-- `props: Object` props to be passed to the `VueComponent` after it is loaded, default: `{}`
-- `content` takes one of
-  - a callback function that returns a `VueComponent`, this can be used to load modals asynchronously
-  - a `VueComponent` instance
-  - a `String`
-- `size: String` (optional) specify modal size (one of: `'sm'`, `'lg'`, or `'full'`)
-- `title: String` modal title, default: `null`
-- `buttons: Object[]` an array of objects describing buttons:
-
+- `buttons: Object[]|boolean` an array of objects describing buttons:
 ```js
 [
   {label: 'Ok', key: 'ok', class: 'btn-primary'},
   {label: 'Cancel', key: 'cancel', class: 'btn-default', reject: true}
 ]
 ```
+- `content` takes one of
+  - a callback function that returns a `VueComponent`, this can be used to load modals asynchronously
+  - a `VueComponent` instance
+  - a `String`
+- `props: Object` props to be passed to the `VueComponent` after it is loaded, default: `{}`
+- `size: String|void` (optional) specify modal size (one of: `'sm'`, `'lg'`, or `'full'`)
+- `static: string|null` modal dismissal options (one of null, 'backdrop', 'full')
+- `title: String|null` modal title, default: `null`
+
 
 `content` is wrapped in `div.modal-body` if either `title` or `buttons` is defined, if neither are present `content`
  is injected directly into `div.modal-dialog`.

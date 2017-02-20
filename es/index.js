@@ -1,11 +1,16 @@
-import map from 'lodash/fp/map';
-import first from 'lodash/fp/first';
-import last from 'lodash/fp/last';
 import hash from 'object-hash';
+
 import findIndex from 'lodash/fp/findIndex';
-import EventEmmitter from 'events';
+import first from 'lodash/fp/first';
 import fromPairs from 'lodash/fp/fromPairs';
+import isString from 'lodash/isString';
+import last from 'lodash/fp/last';
+import map from 'lodash/fp/map';
+
+import EventEmmitter from 'events';
+
 import $ from 'jquery';
+
 import Q from 'q';
 
 import ModalWrapper from './Modal';
@@ -52,11 +57,12 @@ export default {
               buttons = _ref.buttons,
               size = _ref.size,
               Modal = _ref.Modal,
-              props = _ref.props;
+              props = _ref.props,
+              isStatic = _ref.static;
 
           return h(ModalWrapper, {
             attrs: { id: id },
-            props: { title: title, buttons: buttons, size: size, modals: modals }
+            props: { title: title, buttons: buttons, size: size, modals: modals, static: isStatic }
           }, [h(Modal, { props: props })]);
         })(this.modals)));
       },
@@ -159,30 +165,35 @@ export default {
     });
     /**
      * @param {object} options
-     * @param {{}[]} options.buttons - define buttons to inject into the footer
-     * @param {string|function|object} options.content - async require
+     * @param {{label: string, key: any, class: string, reject: boolean}[]|boolean} options.buttons - define buttons to inject into the footer
+     * @param {string|function} options.content - string, VueComponent, or async require
      * @param {object} options.props - data to pass into the modal instance
-     * @param {string} options.title - modal title
-     * @param {string} options.size - modal size (one of 'sm', 'lg', or 'full')
+     * @param {string|null} options.title - modal title
+     * @param {string|void} options.size - modal size (one of 'sm', 'lg', or 'full')
+     * @param {string|null} options.static - modal dismissal options (one of null, 'backdrop', 'full')
      */
-    Vue.prototype.$openModal = function (_ref3) {
+    Vue.prototype.$openModal = function (options) {
       var _this2 = this;
 
-      var _ref3$buttons = _ref3.buttons,
-          buttons = _ref3$buttons === undefined ? true : _ref3$buttons,
-          _ref3$props = _ref3.props,
-          props = _ref3$props === undefined ? {} : _ref3$props,
-          content = _ref3.content,
-          _ref3$size = _ref3.size,
-          size = _ref3$size === undefined ? '' : _ref3$size,
-          _ref3$title = _ref3.title,
-          title = _ref3$title === undefined ? null : _ref3$title;
-
-      if (!content) {
-        throw new Error('options.content is a required argument!', content);
+      if (!options.content) {
+        throw new Error('options.content is a required argument!', options);
       }
-      if (buttons === true) {
-        buttons = [{ label: 'ok', key: 'ok', class: 'btn-primary' }];
+      if (options.buttons === undefined && isString(options.content)) {
+        options.buttons = true;
+      } else if (options.buttons === undefined) {
+        options.buttons = false;
+      }
+      if (options.buttons === true) {
+        options.buttons = [{ label: 'ok', key: 'ok', class: 'btn-primary' }];
+      }
+      if (options.props === undefined) {
+        options.props = {};
+      }
+      if (options.static === undefined) {
+        options.static = null;
+      }
+      if (options.title === undefined) {
+        options.title = null;
       }
       var result = Q.defer();
       var status = { loading: true };
@@ -193,18 +204,19 @@ export default {
         result: result.promise,
         mounted: Q.Promise(function (resolve, reject) {
           try {
-            resolveContent(content)(function (Modal) {
+            resolveContent(options.content)(function (Modal) {
               status.loading = false;
-              var id = hash({ Modal: Modal, props: props });
+              var id = hash({ Modal: Modal, props: options.props });
               stack.push([id, {
-                id: id,
-                title: title,
-                buttons: buttons,
-                size: size,
                 Modal: Modal,
-                props: props,
+                buttons: options.buttons,
+                id: id,
+                props: options.props,
+                reject: result.reject,
                 resolve: result.resolve,
-                reject: result.reject
+                size: options.size,
+                static: options.static,
+                title: options.title
               }]);
               modals.emit('open', id);
               clearInterval(poll);

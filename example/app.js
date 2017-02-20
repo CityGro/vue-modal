@@ -3,17 +3,11 @@ import VueModal from '../src/index'
 
 Vue.use(VueModal)
 
-const MyContent = Vue.component('my-content', {
-  render (createElement) {
-    return createElement('div', ['hello world'])
-  }
-})
-
 const MyCustomContent = Vue.component('my-custom-content', {
-  render (createElement) {
+  render (h) {
     const self = this
-    return createElement('div', null, [
-      createElement('div', {
+    return h('div', null, [
+      h('div', {
         class: {
           'modal-body': true
         },
@@ -21,12 +15,12 @@ const MyCustomContent = Vue.component('my-custom-content', {
           innerHTML: '<iframe width="100%" height="450" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/305747293&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></iframe>'
         }
       }),
-      createElement('div', {
+      h('div', {
         class: {
           'modal-footer': true
         }
       }, [
-       createElement('button', {
+       h('button', {
          class: {
            'btn': true,
            'btn-danger': true
@@ -40,15 +34,40 @@ const MyCustomContent = Vue.component('my-custom-content', {
   }
 })
 
+const MyContent = Vue.component('my-content', {
+  render (h) {
+    return h('div', null, [
+      h('button', {
+        class: {
+          'btn': true,
+          'btn-success': true
+        },
+        on: {
+          click: this.openCustom
+        }
+      }, 'open says me')
+    ])
+  },
+  methods: {
+    openCustom () {
+      this.$openModal({
+        content: MyCustomContent,
+        size: 'lg',
+        static: 'all'
+      })
+    }
+  }
+})
+
 new Vue({
-  render (createElement) {
-    return createElement('div', null, [
-      createElement('div', {
+  render (h) {
+    return h('div', null, [
+      h('div', {
         class: {
           'btn-group': true
         }
       }, [
-        createElement('a', {
+        h('a', {
           class: {
             'btn': true,
             'btn-primary': true
@@ -74,7 +93,7 @@ new Vue({
             }
           }
         }, 'open content'),
-        createElement('a', {
+        h('a', {
           class: {
             'btn': true,
             'btn-danger': true
@@ -82,14 +101,15 @@ new Vue({
           on: {
             click: () => {
               this.$openModal({
-                content: 'This is the beginning of the song',
+                content: "This modal has static = 'backdrop'",
                 title: 'My Small Content',
-                size: 'sm'
+                size: 'sm',
+                static: 'backdrop'
               })
             }
           }
         }, 'open small content'),
-        createElement('a', {
+        h('a', {
           class: {
             'btn': true,
             'btn-warning': true
@@ -104,7 +124,7 @@ new Vue({
             }
           }
         }, 'open large content'),
-        createElement('a', {
+        h('a', {
           class: {
             'btn': true,
             'btn-success': true
@@ -114,13 +134,13 @@ new Vue({
               this.$openModal({
                 content: MyCustomContent,
                 size: 'lg',
-                buttons: false
+                static: 'all'
               })
             }
           }
         }, 'open custom content')
       ]),
-      createElement('modal-view')
+      h('modal-view')
     ])
   }
 }).$mount('#root')

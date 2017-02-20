@@ -1,6 +1,5 @@
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-import $ from 'jquery';
 import Vue from 'vue';
 import map from 'lodash/fp/map';
 
@@ -35,6 +34,9 @@ export default Vue.component('cg-modal', {
       default: function _default() {
         return { key: 'ok' };
       }
+    },
+    static: {
+      required: true
     }
   },
   methods: {
@@ -47,39 +49,15 @@ export default Vue.component('cg-modal', {
       this.modals.emit('dismiss', { id: this.id, result: result });
     }
   },
-  mounted: function mounted() {
-    var _this = this;
-
-    var input = $(this.$el).find('.modal-dialog').first();
-    /**
-     *
-     * @param event
-     */
-    var onClick = function onClick(event) {
-      if (!input.is(event.target) && input.has(event.target).length === 0) {
-        _this.close();
-      }
-    };
-    setTimeout(function () {
-      $(document).on('click', onClick);
-    }, 0);
-    this._unsubscribe = function () {
-      $(document).off('click', onClick);
-    };
-  },
-  beforeDestroy: function beforeDestroy() {
-    this._unsubscribe();
-  },
   render: function render(h) {
     var self = this;
     var header = this.title ? h('div', {
       class: {
         'modal-header': true
       }
-    }, [h('button', {
+    }, [h('a', {
       class: { 'close': true },
       attrs: {
-        'type': 'button',
         'aria-label': 'Close'
       }
     }, [h('span', {
@@ -88,20 +66,26 @@ export default Vue.component('cg-modal', {
       },
       on: {
         click: function click() {
-          return self.dismiss();
+          if (self.static !== 'all') {
+            self.dismiss();
+          }
         }
       }
     }, '×')]), h('h3', { class: { 'modal-title': true } }, self.title)]) : null;
     var footer = this.buttons ? h('div', { class: { 'modal-footer': true } }, map(function (button) {
-      return h('button', {
+      return h('a', {
         class: _defineProperty({
           'btn': true
         }, button.class, true),
         on: {
-          click: button.reject ? function () {
-            return self.dismiss({ key: button.key });
-          } : function () {
-            return self.close({ key: button.key });
+          click: function click() {
+            if (self.static !== 'all') {
+              if (button.reject) {
+                self.dismiss({ key: button.key });
+              } else {
+                self.close({ key: button.key });
+              }
+            }
           }
         }
       }, button.label);
@@ -110,6 +94,13 @@ export default Vue.component('cg-modal', {
       class: {
         modal: true,
         show: true
+      },
+      on: {
+        click: function click() {
+          if (!self.static) {
+            self.dismiss();
+          }
+        }
       }
     }, [h('div', {
       class: {
@@ -117,6 +108,11 @@ export default Vue.component('cg-modal', {
         'modal-lg': self.size === 'lg',
         'modal-sm': self.size === 'sm',
         'modal-full': self.size === 'full'
+      },
+      on: {
+        click: function click(event) {
+          event.stopPropagation();
+        }
       }
     }, [h('div', {
       class: {

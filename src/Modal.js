@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import Vue from 'vue'
 import map from 'lodash/fp/map'
 
@@ -31,6 +30,9 @@ export default Vue.component('cg-modal', {
     result: {
       type: Object,
       default: () => ({key: 'ok'})
+    },
+    static: {
+      required: true
     }
   },
   methods: {
@@ -43,27 +45,6 @@ export default Vue.component('cg-modal', {
       this.modals.emit('dismiss', {id: this.id, result})
     }
   },
-  mounted () {
-    const input = $(this.$el).find('.modal-dialog').first()
-    /**
-     *
-     * @param event
-     */
-    const onClick = (event) => {
-      if (!input.is(event.target) && input.has(event.target).length === 0) {
-        this.close()
-      }
-    }
-    setTimeout(() => {
-      $(document).on('click', onClick)
-    }, 0)
-    this._unsubscribe = () => {
-      $(document).off('click', onClick)
-    }
-  },
-  beforeDestroy () {
-    this._unsubscribe()
-  },
   render (h) {
     const self = this
     const header = (this.title) ? h('div', {
@@ -71,10 +52,9 @@ export default Vue.component('cg-modal', {
         'modal-header': true
       }
     }, [
-      h('button', {
+      h('a', {
         class: {'close': true},
         attrs: {
-          'type': 'button',
           'aria-label': 'Close'
         }
       }, [
@@ -83,20 +63,32 @@ export default Vue.component('cg-modal', {
             'aria-hidden': true
           },
           on: {
-            click: () => self.dismiss()
+            click () {
+              if (self.static !== 'all') {
+                self.dismiss()
+              }
+            }
           }
         }, '×')
       ]),
       h('h3', {class: {'modal-title': true}}, self.title)
     ]) : null
     const footer = (this.buttons) ? h('div', {class: {'modal-footer': true}}, map((button) => {
-      return h('button', {
+      return h('a', {
         class: {
           'btn': true,
           [button.class]: true
         },
         on: {
-          click: (button.reject) ? () => self.dismiss({key: button.key}) : () => self.close({key: button.key})
+          click () {
+            if (self.static !== 'all') {
+              if (button.reject) {
+                self.dismiss({key: button.key})
+              } else {
+                self.close({key: button.key})
+              }
+            }
+          }
         }
       }, button.label)
     })(this.buttons)) : null
@@ -104,6 +96,13 @@ export default Vue.component('cg-modal', {
       class: {
         modal: true,
         show: true
+      },
+      on: {
+        click () {
+          if (!self.static) {
+            self.dismiss()
+          }
+        }
       }
     }, [
       h('div', {
@@ -112,6 +111,11 @@ export default Vue.component('cg-modal', {
           'modal-lg': self.size === 'lg',
           'modal-sm': self.size === 'sm',
           'modal-full': self.size === 'full'
+        },
+        on: {
+          click (event) {
+            event.stopPropagation()
+          }
         }
       }, [
         h('div', {

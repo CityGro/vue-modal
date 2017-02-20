@@ -1,11 +1,16 @@
-import map from 'lodash/fp/map'
-import first from 'lodash/fp/first'
-import last from 'lodash/fp/last'
 import hash from 'object-hash'
+
 import findIndex from 'lodash/fp/findIndex'
-import EventEmmitter from 'events'
+import first from 'lodash/fp/first'
 import fromPairs from 'lodash/fp/fromPairs'
+import isString from 'lodash/isString'
+import last from 'lodash/fp/last'
+import map from 'lodash/fp/map'
+
+import EventEmmitter from 'events'
+
 import $ from 'jquery'
+
 import Q from 'q'
 
 import ModalWrapper from './Modal'
@@ -50,10 +55,10 @@ export default {
             })
           ])
         ] : []
-        return h('div', null, overlay.concat(map(({id, title, buttons, size, Modal, props}) => {
+        return h('div', null, overlay.concat(map(({id, title, buttons, size, Modal, props, static: isStatic}) => {
           return h(ModalWrapper, {
             attrs: {id},
-            props: {title, buttons, size, modals}
+            props: {title, buttons, size, modals, static: isStatic}
           }, [
             h(Modal, {props: props})
           ])
@@ -147,26 +152,35 @@ export default {
     })
     /**
      * @param {object} options
-     * @param {{}[]} options.buttons - define buttons to inject into the footer
-     * @param {string|function|object} options.content - async require
+     * @param {{label: string, key: any, class: string, reject: boolean}[]|boolean} options.buttons - define buttons to inject into the footer
+     * @param {string|function} options.content - string, VueComponent, or async require
      * @param {object} options.props - data to pass into the modal instance
-     * @param {string} options.title - modal title
-     * @param {string} options.size - modal size (one of 'sm', 'lg', or 'full')
+     * @param {string|null} options.title - modal title
+     * @param {string|void} options.size - modal size (one of 'sm', 'lg', or 'full')
+     * @param {string|null} options.static - modal dismissal options (one of null, 'backdrop', 'full')
      */
-    Vue.prototype.$openModal = function ({
-      buttons = true,
-      props = {},
-      content,
-      size = '',
-      title = null
-    }) {
-      if (!content) {
-        throw new Error('options.content is a required argument!', content)
+    Vue.prototype.$openModal = function (options) {
+      if (!options.content) {
+        throw new Error('options.content is a required argument!', options)
       }
-      if (buttons === true) {
-        buttons = [
+      if (options.buttons === undefined && isString(options.content)) {
+        options.buttons = true
+      } else if (options.buttons === undefined) {
+        options.buttons = false
+      }
+      if (options.buttons === true) {
+        options.buttons = [
           {label: 'ok', key: 'ok', class: 'btn-primary'}
         ]
+      }
+      if (options.props === undefined) {
+        options.props = {}
+      }
+      if (options.static === undefined) {
+        options.static = null
+      }
+      if (options.title === undefined) {
+        options.title = null
       }
       const result = Q.defer()
       let status = {loading: true}
@@ -177,18 +191,19 @@ export default {
         result: result.promise,
         mounted: Q.Promise((resolve, reject) => {
           try {
-            resolveContent(content)((Modal) => {
+            resolveContent(options.content)((Modal) => {
               status.loading = false
-              const id = hash({Modal, props})
+              const id = hash({Modal, props: options.props})
               stack.push([id, {
-                id,
-                title,
-                buttons,
-                size,
                 Modal,
-                props,
+                buttons: options.buttons,
+                id,
+                props: options.props,
+                reject: result.reject,
                 resolve: result.resolve,
-                reject: result.reject
+                size: options.size,
+                static: options.static,
+                title: options.title
               }])
               modals.emit('open', id)
               clearInterval(poll)

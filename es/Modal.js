@@ -60,7 +60,7 @@ export default Vue.component('cg-modal', {
       attrs: {
         'aria-label': 'Close'
       }
-    }, [h('span', {
+    }, self.static === 'all' ? [] : [h('span', {
       attrs: {
         'aria-hidden': true
       },
@@ -79,12 +79,10 @@ export default Vue.component('cg-modal', {
         }, button.class, true),
         on: {
           click: function click() {
-            if (self.static !== 'all') {
-              if (button.reject) {
-                self.dismiss({ key: button.key });
-              } else {
-                self.close({ key: button.key });
-              }
+            if (button.reject) {
+              self.dismiss({ key: button.key });
+            } else {
+              self.close({ key: button.key });
             }
           }
         }

@@ -1,5 +1,10 @@
-vue-modal(3) -- reusable modal component for vue 2
-==================================================
+[![build status](https://gitlab.com/citygro/vue-modal/badges/latest/build.svg)](https://gitlab.com/citygro/vue-modal/commits/latest)
+[![coverage report](https://gitlab.com/citygro/vue-modal/badges/latest/coverage.svg)](https://gitlab.com/citygro/vue-modal/commits/latest)
+[![npm downloads](https://img.shields.io/npm/dt/@citygro/vue-modal.svg)](https://npmjs.org/package/@citygro/vue-modal)
+[![npm version](https://img.shields.io/npm/v/@citygro/vue-modal.svg)](https://npmjs.org/package/@citygro/vue-modal)
+
+@citygro/vue-modal(3) -- reusable modal component for vue 2
+===========================================================
 
 see `./example` for a working demonstration
 

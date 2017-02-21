@@ -2,6 +2,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 import Vue from 'vue';
 import map from 'lodash/fp/map';
+import includes from 'lodash/fp/includes';
 
 /**
  * style this component! use bootstrap 3 modal classes
@@ -23,7 +24,7 @@ export default Vue.component('cg-modal', {
       required: true
     },
     size: {
-      type: String
+      type: Array
     },
     modals: {
       type: Object,
@@ -103,10 +104,10 @@ export default Vue.component('cg-modal', {
     }, [h('div', {
       class: {
         'modal-dialog': true,
-        'modal-lg': self.size === 'lg',
-        'modal-sm': self.size === 'sm',
-        'modal-full': self.size === 'full',
-        'modal-tall': self.size === 'tall'
+        'modal-lg': includes('lg')(self.size),
+        'modal-sm': includes('sm')(self.size),
+        'modal-full': includes('full')(self.size),
+        'modal-tall': includes('tall')(self.size)
       },
       on: {
         click: function click(event) {

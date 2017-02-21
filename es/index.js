@@ -6,6 +6,7 @@ import fromPairs from 'lodash/fp/fromPairs';
 import isString from 'lodash/isString';
 import last from 'lodash/fp/last';
 import map from 'lodash/fp/map';
+import flatten from 'lodash/flattenDeep';
 
 import EventEmmitter from 'events';
 
@@ -173,7 +174,7 @@ export default {
      * @param {string|function} options.content - string, VueComponent, or async require
      * @param {object} options.props - data to pass into the modal instance
      * @param {string|null} options.title - modal title
-     * @param {string|void} options.size - modal size (one of 'sm', 'lg', or 'full')
+     * @param {string|string[]|void} options.size - modal size (one of 'sm', 'lg', or 'full' or multiple in an array)
      * @param {string|null} options.static - modal dismissal options (one of null, 'backdrop', 'full')
      */
     Vue.prototype.$openModal = function (options) {
@@ -218,7 +219,7 @@ export default {
                 props: options.props,
                 reject: result.reject,
                 resolve: result.resolve,
-                size: options.size,
+                size: flatten([options.size]),
                 static: options.static,
                 title: options.title
               }]);

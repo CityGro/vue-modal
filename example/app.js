@@ -6,7 +6,11 @@ Vue.use(VueModal)
 const MyCustomContent = Vue.component('my-custom-content', {
   render (h) {
     const self = this
-    return h('div', null, [
+    return h('div', {
+      class: {
+        'modal-content': true
+      }
+    }, [
       h('div', {
         class: {
           'modal-body': true
@@ -52,7 +56,7 @@ const MyContent = Vue.component('my-content', {
     openCustom () {
       this.$openModal({
         content: MyCustomContent,
-        size: 'lg',
+        size: ['tall', 'lg'],
         static: 'all'
       })
     }

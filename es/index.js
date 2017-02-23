@@ -143,7 +143,7 @@ export default {
          * update loading state
          */
         modals.on('progress', function (loading) {
-          _this.loading = _this.loading || loading;
+          _this.loading = loading;
         });
         /**
          * close the modal (resolve)
@@ -211,6 +211,7 @@ export default {
           try {
             resolveContent(options.content)(function (Modal) {
               status.loading = false;
+              modals.emit('progress', status.loading);
               var id = hash({ Modal: Modal, props: options.props });
               stack.push([id, {
                 Modal: Modal,

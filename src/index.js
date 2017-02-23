@@ -130,7 +130,7 @@ export default {
          * update loading state
          */
         modals.on('progress', (loading) => {
-          this.loading = this.loading || loading
+          this.loading = loading
         })
         /**
          * close the modal (resolve)
@@ -198,6 +198,7 @@ export default {
           try {
             resolveContent(options.content)((Modal) => {
               status.loading = false
+              modals.emit('progress', status.loading)
               const id = hash({Modal, props: options.props})
               stack.push([id, {
                 Modal,

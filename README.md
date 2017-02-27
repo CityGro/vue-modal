@@ -68,30 +68,39 @@ new Vue({
   - a `VueComponent` instance
   - a `String`
 - `props: Object` props to be passed to the `VueComponent` after it is loaded, default: `{}`
-- `size: String|String[]|void` (optional) specify modal size (one of: `'sm'`, `'lg'`, or `'full'`); specify multiple options as an array
+- `size: String|String[]|void` (optional) specify modal size (one of: `'sm'`, `'lg'`, or `'full'`); specify multiple
+  options as an array
 - `static: string|null` modal dismissal options (one of null, 'backdrop', 'full')
 - `title: String|null` modal title, default: `null`
+- `class: Object` class names to bind to `.modal` (see [vue guide])
 
 
 `content` is wrapped in `div.modal-body` if either `title` or `buttons` is defined, if neither are present `content`
  is injected directly into `div.modal-dialog`.
+ 
+[vue guide]: https://vuejs.org/v2/guide/class-and-style.html
 
 #### return `{result: Promise<void, Error>, mounted: Promise<VueComponent, Error>`
 
 - `mounted: Promise<VueComponent, Error>` a promise for the modal component
 - `result: Promise<void, Error>` a `Promise` that is resolved (close) or rejected (dismiss) depending on user input
 
-### `content.$parent.close()`
+### `content.$parent.close(options: {key: String})`
 
 > note that `$parent` refers to the modal itself, *not* the component calling `$openModal()`
 
 close this modal (and resolve `result`).
 
-### `content.$parent.dismiss()`
+### `content.$parent.dismiss(options: {key: String})`
 
 > note that `$parent` refers to the modal itself, *not* the component calling `$openModal()`
 
 dismiss this modal (and reject `result`)
+
+### `content.$modalOptions: Object` 
+
+optional static modal options which are merged with any options passed to `$openModal()`. options passed at the call
+site will take precedence.
 
 ## custom styles
 

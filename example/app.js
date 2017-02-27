@@ -4,6 +4,10 @@ import VueModal from '../src/index'
 Vue.use(VueModal)
 
 const MyCustomContent = Vue.component('my-custom-content', {
+  $modalOptions: {
+    size: ['tall', 'lg'],
+    static: 'all'
+  },
   render (h) {
     const self = this
     return h('div', {
@@ -56,8 +60,9 @@ const MyContent = Vue.component('my-content', {
     openCustom () {
       this.$openModal({
         content: MyCustomContent,
-        size: ['tall', 'lg'],
-        static: 'all'
+        class: {
+          death: true
+        }
       })
     }
   }
@@ -136,9 +141,7 @@ new Vue({
           on: {
             click: () => {
               this.$openModal({
-                content: MyCustomContent,
-                size: 'lg',
-                static: 'all'
+                content: MyCustomContent
               })
             }
           }

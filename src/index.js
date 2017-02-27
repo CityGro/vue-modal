@@ -7,6 +7,8 @@ import isString from 'lodash/isString'
 import last from 'lodash/fp/last'
 import map from 'lodash/fp/map'
 import flatten from 'lodash/flattenDeep'
+import assign from 'lodash/assign'
+import property from 'lodash/property'
 
 import EventEmmitter from 'events'
 
@@ -60,12 +62,19 @@ export default {
           class: {
             'modal-view': true
           }
-        }, overlay.concat(map(({id, title, buttons, size, Modal, props, static: isStatic}) => {
+        }, overlay.concat(map((options) => {
           return h(ModalWrapper, {
-            attrs: {id},
-            props: {title, buttons, size, modals, static: isStatic}
+            attrs: {id: options.id},
+            props: {
+              title: options.title,
+              buttons: options.buttons,
+              size: options.size,
+              modals,
+              static: options.static
+            },
+            class: options.class
           }, [
-            h(Modal, {props: props})
+            h(options.Modal, {props: options.props})
           ])
         })(this.modals)))
       },
@@ -163,29 +172,11 @@ export default {
      * @param {string|null} options.title - modal title
      * @param {string|string[]|void} options.size - modal size (one of 'sm', 'lg', or 'full' or multiple in an array)
      * @param {string|null} options.static - modal dismissal options (one of null, 'backdrop', 'full')
+     * @param {object|null} options.class - additional classes to add to the modal-dialog
      */
     Vue.prototype.$openModal = function (options) {
       if (!options.content) {
         throw new Error('options.content is a required argument!', options)
-      }
-      if (options.buttons === undefined && isString(options.content)) {
-        options.buttons = true
-      } else if (options.buttons === undefined) {
-        options.buttons = false
-      }
-      if (options.buttons === true) {
-        options.buttons = [
-          {label: 'ok', key: 'ok', class: 'btn-primary'}
-        ]
-      }
-      if (options.props === undefined) {
-        options.props = {}
-      }
-      if (options.static === undefined) {
-        options.static = null
-      }
-      if (options.title === undefined) {
-        options.title = null
       }
       const result = Q.defer()
       let status = {loading: true}
@@ -199,6 +190,31 @@ export default {
             resolveContent(options.content)((Modal) => {
               status.loading = false
               modals.emit('progress', status.loading)
+              if (property('options.$modalOptions')(Modal)) {
+                options = assign({}, Modal.options.$modalOptions, options)
+              }
+              if (options.buttons === undefined && isString(options.content)) {
+                options.buttons = true
+              } else if (options.buttons === undefined) {
+                options.buttons = false
+              }
+              if (options.buttons === true) {
+                options.buttons = [
+                  {label: 'ok', key: 'ok', class: 'btn-primary'}
+                ]
+              }
+              if (options.props === undefined) {
+                options.props = {}
+              }
+              if (options.static === undefined) {
+                options.static = null
+              }
+              if (options.title === undefined) {
+                options.title = null
+              }
+              if (options.class === undefined) {
+                options.class = {}
+              }
               const id = hash({Modal, props: options.props})
               stack.push([id, {
                 Modal,
@@ -209,7 +225,8 @@ export default {
                 resolve: result.resolve,
                 size: flatten([options.size]),
                 static: options.static,
-                title: options.title
+                title: options.title,
+                class: options.class
               }])
               modals.emit('open', id)
               clearInterval(poll)

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import map from 'lodash/fp/map'
 import includes from 'lodash/fp/includes'
+import property from 'lodash/fp/property'
 
 /**
  * style this component! use bootstrap 3 modal classes
@@ -37,12 +38,24 @@ export default Vue.component('cg-modal', {
     }
   },
   methods: {
+    /**
+     * close the modal (resolve)
+     * @param {{key: string}} result
+     */
     close (result) {
-      result = result || this.result
+      if (result === undefined || property('key')(result) === undefined) {
+        result = this.result
+      }
       this.modals.emit('close', {id: this.id, result})
     },
+    /**
+     * close the modal (reject)
+     * @param {{key: string}} result
+     */
     dismiss (result) {
-      result = result || this.result
+      if (result === undefined || property('key')(result) === undefined) {
+        result = this.result
+      }
       this.modals.emit('dismiss', {id: this.id, result})
     }
   },

@@ -4,6 +4,7 @@ import Vue from 'vue';
 import map from 'lodash/fp/map';
 import includes from 'lodash/fp/includes';
 import property from 'lodash/fp/property';
+import isString from 'lodash/fp/isString';
 
 /**
  * style this component! use bootstrap 3 modal classes
@@ -44,22 +45,26 @@ export default Vue.component('cg-modal', {
   methods: {
     /**
      * close the modal (resolve)
-     * @param {{key: string}} result
+     * @param {{key: string}|string} result
      */
     close: function close(result) {
       if (result === undefined || property('key')(result) === undefined) {
         result = this.result;
+      } else if (isString(result)) {
+        result = { key: result };
       }
       this.modals.emit('close', { id: this.id, result: result });
     },
 
     /**
      * close the modal (reject)
-     * @param {{key: string}} result
+     * @param {{key: string}|string} result
      */
     dismiss: function dismiss(result) {
       if (result === undefined || property('key')(result) === undefined) {
         result = this.result;
+      } else if (isString(result)) {
+        result = { key: result };
       }
       this.modals.emit('dismiss', { id: this.id, result: result });
     }
@@ -95,9 +100,9 @@ export default Vue.component('cg-modal', {
         on: {
           click: function click() {
             if (button.reject) {
-              self.dismiss({ key: button.key });
+              self.dismiss({ key: button.key, label: button.label });
             } else {
-              self.close({ key: button.key });
+              self.close({ key: button.key, label: button.label });
             }
           }
         }

@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import map from 'lodash/fp/map'
 import includes from 'lodash/fp/includes'
-import property from 'lodash/fp/property'
-import isString from 'lodash/fp/isString'
 
 /**
  * style this component! use bootstrap 3 modal classes
@@ -44,9 +42,9 @@ export default Vue.component('cg-modal', {
      * @param {{key: string}|string} result
      */
     close (result) {
-      if (result === undefined || property('key')(result) === undefined) {
+      if (result === undefined) {
         result = this.result
-      } else if (isString(result)) {
+      } else {
         result = {key: result}
       }
       this.modals.emit('close', {id: this.id, result})
@@ -56,9 +54,9 @@ export default Vue.component('cg-modal', {
      * @param {{key: string}|string} result
      */
     dismiss (result) {
-      if (result === undefined || property('key')(result) === undefined) {
+      if (result === undefined) {
         result = this.result
-      } else if (isString(result)) {
+      } else {
         result = {key: result}
       }
       this.modals.emit('dismiss', {id: this.id, result})

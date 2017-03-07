@@ -125,7 +125,7 @@ new Vue({
           },
           on: {
             click: () => {
-              this.$openModal({
+              Vue.$openModal({
                 content: Vue.component('inline-content', {
                   render (h) {
                     return h('p', null, ['this component is defined inline'])

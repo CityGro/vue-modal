@@ -3,45 +3,6 @@ import VueModal from '../src/index'
 
 Vue.use(VueModal)
 
-const MyCustomContent = Vue.component('my-custom-content', {
-  $modalOptions: {
-    size: ['tall', 'lg'],
-    static: 'all'
-  },
-  render (h) {
-    const self = this
-    return h('div', {
-      class: {
-        'modal-content': true
-      }
-    }, [
-      h('div', {
-        class: {
-          'modal-body': true
-        },
-        domProps: {
-          innerHTML: '<iframe width="100%" height="450" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/305747293&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;visual=true"></iframe>'
-        }
-      }),
-      h('div', {
-        class: {
-          'modal-footer': true
-        }
-      }, [
-       h('button', {
-         class: {
-           'btn': true,
-           'btn-danger': true
-         },
-         on: {
-           click: () => self.$parent.close()
-         }
-       }, 'close')
-      ])
-    ])
-  }
-})
-
 const MyContent = Vue.component('my-content', {
   render (h) {
     return h('div', null, [
@@ -59,7 +20,7 @@ const MyContent = Vue.component('my-content', {
   methods: {
     openCustom () {
       this.$openModal({
-        content: MyCustomContent,
+        content: (resolve) => require(['./MyCustomContent'], resolve),
         class: {
           death: true
         }
@@ -69,8 +30,31 @@ const MyContent = Vue.component('my-content', {
 })
 
 new Vue({
+  data () {
+    return {
+      modalLoading: false
+    }
+  },
   render (h) {
+    const self = this
     return h('div', null, [
+      h('div', {
+        class: {
+          'progress': true
+        }
+      }, [
+        h('div', {
+          class: {
+            'progress-bar': true,
+            'progress-bar-striped': true,
+            'progress-bar-info': true,
+            'active': self.modalLoading
+          },
+          style: {
+            width: '100%'
+          }
+        })
+      ]),
       h('div', {
         class: {
           'btn-group': true
@@ -144,13 +128,19 @@ new Vue({
           on: {
             click: () => {
               this.$openModal({
-                content: MyCustomContent
+                content: (resolve) => require(['./MyCustomContent'], resolve)
               })
             }
           }
         }, 'open custom content')
       ]),
-      h('modal-view')
+      h('modal-view', {
+        on: {
+          progress: (loading) => {
+            self.modalLoading = loading
+          }
+        }
+      })
     ])
   }
 }).$mount('#root')

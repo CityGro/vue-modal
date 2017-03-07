@@ -29,66 +29,23 @@ export default {
      */
     Vue.component('modal-view', {
       render (h) {
-        const overlay = (this.loading) ? [
-          h('div', {
-            class: {
-              'modal-loading': true
-            },
-            style: {
-              'position': 'fixed',
-              'top': 0,
-              'left': 0,
-              'height': '100vh',
-              'width': '100vw',
-              'background-color': 'rgba(0, 0, 0, 0.5)',
-              'text-align': 'center'
-            }
-          }, [
-            h('i', {
-              class: {
-                'fa': true,
-                'fa-spinner': true,
-                'fa-spin': true
-              },
-              style: {
-                'font-size': '5em',
-                'margin-top': '25%'
-              }
-            })
-          ])
-        ] : []
         return h('div', {
           class: {
             'modal-view': true
           }
-        }, overlay.concat(map((options) => {
-          return h('transition', {
-            props: {
-              name: 'component-fade',
-              mode: 'in-out'
-            }
-          }, [
-            h(ModalWrapper, {
-              attrs: {id: options.id},
-              props: {
-                title: options.title,
-                buttons: options.buttons,
-                size: options.size,
-                modals,
-                static: options.static
-              },
-              class: options.class
-            }, [
-              h(options.Modal, {props: options.props})
-            ])
-          ])
-        })(this.modals)))
-      },
-      props: {
-        disableLoadingIndicator: {
-          type: Boolean,
-          default: false
-        }
+        }, map((options) => h(ModalWrapper, {
+          attrs: {id: options.id},
+          props: {
+            title: options.title,
+            buttons: options.buttons,
+            size: options.size,
+            modals,
+            static: options.static
+          },
+          class: options.class
+        }, [
+          h(options.Modal, {props: options.props})
+        ]))(this.modals))
       },
       data () {
         return {
@@ -145,6 +102,7 @@ export default {
          */
         modals.on('progress', (loading) => {
           this.loading = loading
+          this.$emit('progress', this.loading)
         })
         /**
          * close the modal (resolve)
@@ -187,7 +145,7 @@ export default {
       let status = {loading: true}
       const poll = setInterval(() => {
         modals.emit('progress', status.loading)
-      }, 200)
+      }, 10)
       return {
         result: result.promise,
         mounted: Q.Promise((resolve, reject) => {
@@ -195,6 +153,7 @@ export default {
             resolveContent(options.content)((Modal) => {
               status.loading = false
               modals.emit('progress', status.loading)
+              clearInterval(poll)
               if (property('options.$modalOptions')(Modal)) {
                 options = assign({}, Modal.options.$modalOptions, options)
               }
@@ -220,7 +179,7 @@ export default {
               if (options.class === undefined) {
                 options.class = {}
               }
-              const id = uniqueId('@citygro/vue-modal-')
+              const id = uniqueId()
               stack.push([id, {
                 Modal,
                 buttons: options.buttons,
@@ -234,7 +193,6 @@ export default {
                 class: options.class
               }])
               modals.emit('open', id)
-              clearInterval(poll)
               this.$nextTick(() => {
                 resolve(Modal)
               })

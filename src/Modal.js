@@ -38,11 +38,16 @@ export default Vue.component('cg-modal', {
   },
   data () {
     return {
-      loading: true
+      transition: false
     }
   },
   mounted () {
-    this.loading = false
+    setTimeout(() => {
+      this.transition = true
+    }, 150)
+  },
+  beforeDestroy () {
+    this.transition = false
   },
   methods: {
     /**
@@ -72,6 +77,7 @@ export default Vue.component('cg-modal', {
   },
   render (h) {
     const self = this
+    // create header if a title is specified
     const header = (this.title) ? h('div', {
       class: {
         'modal-header': true
@@ -98,6 +104,7 @@ export default Vue.component('cg-modal', {
       ]),
       h('h3', {class: {'modal-title': true}}, self.title)
     ]) : null
+    // create footer if there are buttons defined
     const footer = (this.buttons) ? h('div', {class: {'modal-footer': true}}, map((button) => {
       return h('a', {
         class: {
@@ -118,8 +125,11 @@ export default Vue.component('cg-modal', {
     return h('div', {
       class: {
         modal: true,
-        fade: self.loading,
-        show: !self.loading
+        fade: true,
+        'in': self.transition
+      },
+      style: {
+        display: 'block !important'
       },
       on: {
         click () {

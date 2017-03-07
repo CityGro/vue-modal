@@ -58,7 +58,12 @@ export default {
             'modal-view': true
           }
         }, overlay.concat(map(function (options) {
-          return h(ModalWrapper, {
+          return h('transition', {
+            props: {
+              name: 'component-fade',
+              mode: 'in-out'
+            }
+          }, [h(ModalWrapper, {
             attrs: { id: options.id },
             props: {
               title: options.title,
@@ -68,7 +73,7 @@ export default {
               static: options.static
             },
             class: options.class
-          }, [h(options.Modal, { props: options.props })]);
+          }, [h(options.Modal, { props: options.props })])]);
         })(this.modals)));
       },
 
@@ -177,7 +182,7 @@ export default {
      * @param {string|null} options.static - modal dismissal options (one of null, 'backdrop', 'full')
      * @param {object|null} options.class - additional classes to add to the modal-dialog
      */
-    Vue.prototype.$openModal = function (options) {
+    Vue.$openModal = function (options) {
       var _this2 = this;
 
       if (!options.content) {

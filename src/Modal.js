@@ -36,6 +36,14 @@ export default Vue.component('cg-modal', {
       required: true
     }
   },
+  data () {
+    return {
+      loading: true
+    }
+  },
+  mounted () {
+    this.loading = false
+  },
   methods: {
     /**
      * close the modal (resolve)
@@ -110,7 +118,8 @@ export default Vue.component('cg-modal', {
     return h('div', {
       class: {
         modal: true,
-        show: true
+        fade: self.loading,
+        show: !self.loading
       },
       on: {
         click () {

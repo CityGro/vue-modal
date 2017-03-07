@@ -126,9 +126,12 @@ new Vue({
           on: {
             click: () => {
               this.$openModal({
-                content: (cb) => cb(MyContent),
-                title: 'My Large Content',
-                size: 'lg'
+                content: Vue.component('inline-content', {
+                  render (h) {
+                    return h('p', null, ['this component is defined inline'])
+                  }
+                }),
+                title: 'Inline Component'
               })
             }
           }

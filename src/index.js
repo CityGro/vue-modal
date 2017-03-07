@@ -62,18 +62,25 @@ export default {
             'modal-view': true
           }
         }, overlay.concat(map((options) => {
-          return h(ModalWrapper, {
-            attrs: {id: options.id},
+          return h('transition', {
             props: {
-              title: options.title,
-              buttons: options.buttons,
-              size: options.size,
-              modals,
-              static: options.static
-            },
-            class: options.class
+              name: 'component-fade',
+              mode: 'in-out'
+            }
           }, [
-            h(options.Modal, {props: options.props})
+            h(ModalWrapper, {
+              attrs: {id: options.id},
+              props: {
+                title: options.title,
+                buttons: options.buttons,
+                size: options.size,
+                modals,
+                static: options.static
+              },
+              class: options.class
+            }, [
+              h(options.Modal, {props: options.props})
+            ])
           ])
         })(this.modals)))
       },
@@ -172,7 +179,7 @@ export default {
      * @param {string|null} options.static - modal dismissal options (one of null, 'backdrop', 'full')
      * @param {object|null} options.class - additional classes to add to the modal-dialog
      */
-    Vue.prototype.$openModal = function (options) {
+    Vue.$openModal = function (options) {
       if (!options.content) {
         throw new Error('options.content is a required argument!', options)
       }

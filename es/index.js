@@ -1,5 +1,3 @@
-import hash from 'object-hash';
-
 import findIndex from 'lodash/fp/findIndex';
 import first from 'lodash/fp/first';
 import fromPairs from 'lodash/fp/fromPairs';
@@ -9,6 +7,7 @@ import map from 'lodash/fp/map';
 import flatten from 'lodash/flattenDeep';
 import assign from 'lodash/assign';
 import property from 'lodash/property';
+import uniqueId from 'lodash/uniqueId';
 
 import EventEmmitter from 'events';
 
@@ -117,7 +116,6 @@ export default {
               }
               stack.splice(index, 1);
               _this.modals = _this.getModals();
-              _this.$forceUpdate();
             }
           };
         };
@@ -220,7 +218,7 @@ export default {
               if (options.class === undefined) {
                 options.class = {};
               }
-              var id = hash({ Modal: Modal, props: options.props });
+              var id = uniqueId('@citygro/vue-modal-');
               stack.push([id, {
                 Modal: Modal,
                 buttons: options.buttons,

@@ -180,22 +180,22 @@ export default {
                 options.class = {}
               }
               const id = uniqueId()
-              stack.push([id, {
-                Modal,
-                buttons: options.buttons,
-                id,
-                props: options.props,
-                reject: result.reject,
-                resolve: result.resolve,
-                size: flatten([options.size]),
-                static: options.static,
-                title: options.title,
-                class: options.class
-              }])
-              modals.emit('open', id)
-              this.$nextTick(() => {
-                resolve(Modal)
-              })
+              resolve(Modal)
+              setTimeout(() => {
+                stack.push([id, {
+                  Modal,
+                  buttons: options.buttons,
+                  class: options.class,
+                  id,
+                  props: options.props,
+                  reject: result.reject,
+                  resolve: result.resolve,
+                  size: flatten([options.size]),
+                  static: options.static,
+                  title: options.title
+                }])
+                modals.emit('open', id)
+              }, 0)
             })
           } catch (e) {
             reject(e)

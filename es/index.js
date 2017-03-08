@@ -148,8 +148,6 @@ export default {
      * @param {object|null} options.class - additional classes to add to the modal-dialog
      */
     Vue.prototype.$openModal = Vue.$openModal = function (options) {
-      var _this2 = this;
-
       if (!options.content) {
         throw new Error('options.content is a required argument!', options);
       }
@@ -190,22 +188,22 @@ export default {
                 options.class = {};
               }
               var id = uniqueId();
-              stack.push([id, {
-                Modal: Modal,
-                buttons: options.buttons,
-                id: id,
-                props: options.props,
-                reject: result.reject,
-                resolve: result.resolve,
-                size: flatten([options.size]),
-                static: options.static,
-                title: options.title,
-                class: options.class
-              }]);
-              modals.emit('open', id);
-              _this2.$nextTick(function () {
-                resolve(Modal);
-              });
+              resolve(Modal);
+              setTimeout(function () {
+                stack.push([id, {
+                  Modal: Modal,
+                  buttons: options.buttons,
+                  class: options.class,
+                  id: id,
+                  props: options.props,
+                  reject: result.reject,
+                  resolve: result.resolve,
+                  size: flatten([options.size]),
+                  static: options.static,
+                  title: options.title
+                }]);
+                modals.emit('open', id);
+              }, 0);
             });
           } catch (e) {
             reject(e);

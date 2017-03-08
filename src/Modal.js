@@ -57,8 +57,6 @@ export default Vue.component('cg-modal', {
     close (result) {
       if (result === undefined) {
         result = this.result
-      } else {
-        result = {key: result}
       }
       this.modals.emit('close', {id: this.id, result})
     },
@@ -69,8 +67,6 @@ export default Vue.component('cg-modal', {
     dismiss (result) {
       if (result === undefined) {
         result = this.result
-      } else {
-        result = {key: result}
       }
       this.modals.emit('dismiss', {id: this.id, result})
     }

@@ -147,7 +147,7 @@ export default {
      * @param {string|null} options.static - modal dismissal options (one of null, 'backdrop', 'full')
      * @param {object|null} options.class - additional classes to add to the modal-dialog
      */
-    Vue.prototype.$openModal = Vue.$openModal = function (options) {
+    var openModal = function openModal(options) {
       if (!options.content) {
         throw new Error('options.content is a required argument!', options);
       }
@@ -211,5 +211,7 @@ export default {
         })
       };
     };
+    Vue.$openModal = openModal;
+    Vue.prototype.$openModal = openModal;
   }
 };

@@ -64,8 +64,6 @@ export default Vue.component('cg-modal', {
     close: function close(result) {
       if (result === undefined) {
         result = this.result;
-      } else {
-        result = { key: result };
       }
       this.modals.emit('close', { id: this.id, result: result });
     },
@@ -77,8 +75,6 @@ export default Vue.component('cg-modal', {
     dismiss: function dismiss(result) {
       if (result === undefined) {
         result = this.result;
-      } else {
-        result = { key: result };
       }
       this.modals.emit('dismiss', { id: this.id, result: result });
     }
@@ -131,7 +127,7 @@ export default Vue.component('cg-modal', {
         'in': self.transition
       },
       style: {
-        display: 'block !important'
+        display: 'flex'
       },
       on: {
         click: function click() {

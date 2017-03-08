@@ -125,7 +125,7 @@ export default Vue.component('cg-modal', {
         'in': self.transition
       },
       style: {
-        display: 'block !important'
+        display: 'flex'
       },
       on: {
         click () {

@@ -157,6 +157,9 @@ export default {
               if (property('options.$modalOptions')(Modal)) {
                 options = assign({}, Modal.options.$modalOptions, options)
               }
+              if (property('$modalOptions')(Modal)) {
+                options = assign({}, Modal.$modalOptions, options)
+              }
               if (options.buttons === undefined && isString(options.content)) {
                 options.buttons = true
               } else if (options.buttons === undefined) {

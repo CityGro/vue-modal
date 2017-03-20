@@ -10,8 +10,20 @@ module.exports = {
     path: __dirname,
     filename: 'bundle.js'
   },
+  resolve: {
+    extensions: ['.js', '.json', '.vue']
+  },
   module: {
     loaders: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        options: {
+          loaders: {
+            css: ['vue-style-loader', 'css-loader?sourceMap', 'resolve-url-loader']
+          }
+        }
+      },
       {
         test: /\.js$/,
         loaders: ['babel-loader'],

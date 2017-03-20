@@ -1,25 +1,224 @@
-import findIndex from 'lodash/fp/findIndex';
-import first from 'lodash/fp/first';
-import fromPairs from 'lodash/fp/fromPairs';
-import isString from 'lodash/isString';
-import last from 'lodash/fp/last';
-import map from 'lodash/fp/map';
-import flatten from 'lodash/flattenDeep';
-import assign from 'lodash/assign';
-import property from 'lodash/property';
-import uniqueId from 'lodash/uniqueId';
+'use strict';
 
-import EventEmmitter from 'events';
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-import $ from 'jquery';
+var findIndex = _interopDefault(require('lodash/fp/findIndex'));
+var first = _interopDefault(require('lodash/fp/first'));
+var fromPairs = _interopDefault(require('lodash/fp/fromPairs'));
+var isString = _interopDefault(require('lodash/isString'));
+var last = _interopDefault(require('lodash/fp/last'));
+var map = _interopDefault(require('lodash/fp/map'));
+var flatten = _interopDefault(require('lodash/flattenDeep'));
+var assign = _interopDefault(require('lodash/assign'));
+var property = _interopDefault(require('lodash/property'));
+var uniqueId = _interopDefault(require('lodash/uniqueId'));
+var EventEmmitter = _interopDefault(require('events'));
+var $ = _interopDefault(require('jquery'));
+var Q = _interopDefault(require('q'));
+var Vue = _interopDefault(require('vue'));
+var includes = _interopDefault(require('lodash/fp/includes'));
 
-import Q from 'q';
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
 
-import ModalWrapper from './Modal';
-import { resolveContent } from './utils';
+  return obj;
+};
 
-export default {
-  install: function install(Vue) {
+/**
+ * style this component! use bootstrap 3 modal classes
+ * @function
+ * @param {string} id
+ * @param {{}[]}
+ */
+var ModalWrapper = Vue.component('cg-modal', {
+  name: 'cg-modal',
+  props: {
+    id: {
+      type: String,
+      required: true
+    },
+    title: {
+      required: true
+    },
+    buttons: {
+      required: true
+    },
+    size: {
+      type: Array
+    },
+    modals: {
+      type: Object,
+      required: true
+    },
+    result: {
+      type: Object,
+      default: function _default() {
+        return { key: 'ok' };
+      }
+    },
+    static: {
+      required: true
+    }
+  },
+  data: function data() {
+    return {
+      transition: false
+    };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    setTimeout(function () {
+      _this.transition = true;
+    }, 150);
+  },
+  beforeDestroy: function beforeDestroy() {
+    this.transition = false;
+  },
+
+  methods: {
+    /**
+     * close the modal (resolve)
+     * @param {{key: string}|string} result
+     */
+    close: function close(result) {
+      if (result === undefined) {
+        result = this.result;
+      }
+      this.modals.emit('close', { id: this.id, result: result });
+    },
+
+    /**
+     * close the modal (reject)
+     * @param {{key: string}|string} result
+     */
+    dismiss: function dismiss(result) {
+      if (result === undefined) {
+        result = this.result;
+      }
+      this.modals.emit('dismiss', { id: this.id, result: result });
+    }
+  },
+  render: function render(h) {
+    var self = this;
+    // create header if a title is specified
+    var header = this.title ? h('div', {
+      class: {
+        'modal-header': true
+      }
+    }, [h('a', {
+      class: { 'close': true },
+      attrs: {
+        'aria-label': 'Close'
+      }
+    }, self.static === 'all' ? [] : [h('span', {
+      attrs: {
+        'aria-hidden': true
+      },
+      on: {
+        click: function click() {
+          if (self.static !== 'all') {
+            self.dismiss();
+          }
+        }
+      }
+    }, '×')]), h('h3', { class: { 'modal-title': true } }, self.title)]) : null;
+    // create footer if there are buttons defined
+    var footer = this.buttons ? h('div', { class: { 'modal-footer': true } }, map(function (button) {
+      return h('a', {
+        class: defineProperty({
+          'btn': true
+        }, button.class, true),
+        on: {
+          click: function click() {
+            if (button.reject) {
+              self.dismiss({ key: button.key, label: button.label });
+            } else {
+              self.close({ key: button.key, label: button.label });
+            }
+          }
+        }
+      }, button.label);
+    })(this.buttons)) : null;
+    return h('div', {
+      class: {
+        modal: true,
+        fade: true,
+        'in': self.transition
+      },
+      style: {
+        display: 'flex'
+      },
+      on: {
+        click: function click() {
+          if (!self.static) {
+            self.dismiss();
+          }
+        }
+      }
+    }, [h('div', {
+      class: {
+        'modal-dialog': true,
+        'modal-lg': includes('lg')(self.size),
+        'modal-sm': includes('sm')(self.size),
+        'modal-full': includes('full')(self.size),
+        'modal-tall': includes('tall')(self.size)
+      },
+      on: {
+        click: function click(event) {
+          event.stopPropagation();
+        }
+      }
+    }, [header || footer ? h('div', {
+      class: {
+        'modal-content': true
+      }
+    }, [header, h('div', { class: { 'modal-body': true } }, [self.$slots.default]), footer]) : self.$slots.default])]);
+  }
+});
+
+var ContentWrapper = (function (content) {
+  return Vue.component('cg-content-wrapper', {
+    name: 'cg-content-wrapper',
+    render: function render(h) {
+      return h('p', null, content);
+    }
+  });
+});
+
+/**
+ * wraps string and VueComponents in an async require compatible callback function
+ *
+ * @param {string|function} content
+ * @returns {function}
+ */
+var resolveContent = function resolveContent(content) {
+  if (isString(content)) {
+    return function (cb) {
+      return cb(ContentWrapper(content));
+    };
+  } else if (typeof content === 'function') {
+    if (content.name === 'VueComponent') {
+      return function (cb) {
+        return cb(content);
+      };
+    } else {
+      return content;
+    }
+  }
+};
+
+var index = {
+  install: function install(Vue$$1) {
     var modals = new EventEmmitter();
     var stack = [];
     /**
@@ -27,7 +226,7 @@ export default {
      * @function
      * @param {Boolean} disableLoadingIndicator - disable built-in loading indicator
      */
-    Vue.component('modal-view', {
+    Vue$$1.component('modal-view', {
       render: function render(h) {
         return h('div', {
           class: {
@@ -167,6 +366,9 @@ export default {
               if (property('options.$modalOptions')(Modal)) {
                 options = assign({}, Modal.options.$modalOptions, options);
               }
+              if (property('$modalOptions')(Modal)) {
+                options = assign({}, Modal.$modalOptions, options);
+              }
               if (options.buttons === undefined && isString(options.content)) {
                 options.buttons = true;
               } else if (options.buttons === undefined) {
@@ -211,7 +413,9 @@ export default {
         })
       };
     };
-    Vue.$openModal = openModal;
-    Vue.prototype.$openModal = openModal;
+    Vue$$1.$openModal = openModal;
+    Vue$$1.prototype.$openModal = openModal;
   }
 };
+
+module.exports = index;

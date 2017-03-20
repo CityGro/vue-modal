@@ -2,7 +2,7 @@
   "name": "@citygro/vue-modal",
   "version": "4.6.5",
   "description": "reusable modal component for vue 2",
-  "main": "src/index.js",
+  "main": "vue-modal.common.js",
   "jest": {
     "rootDir": "src",
     "moduleFileExtensions": [

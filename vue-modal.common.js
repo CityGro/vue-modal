@@ -80,6 +80,9 @@ var ModalWrapper = Vue.component('cg-modal', {
     setTimeout(function () {
       _this.transition = true;
     }, 150);
+    if (this.$refs.focus && this.$refs.focus.focus) {
+      this.$refs.focus.focus();
+    }
   },
   beforeDestroy: function beforeDestroy() {
     this.transition = false;
@@ -115,7 +118,7 @@ var ModalWrapper = Vue.component('cg-modal', {
       class: {
         'modal-header': true
       }
-    }, [h('a', {
+    }, [h('button', {
       class: { 'close': true },
       attrs: {
         'aria-label': 'Close'
@@ -134,10 +137,11 @@ var ModalWrapper = Vue.component('cg-modal', {
     }, '×')]), h('h3', { class: { 'modal-title': true } }, self.title)]) : null;
     // create footer if there are buttons defined
     var footer = this.buttons ? h('div', { class: { 'modal-footer': true } }, map(function (button) {
-      return h('a', {
+      return h('button', {
         class: defineProperty({
           'btn': true
         }, button.class, true),
+        ref: button.focus === true ? 'focus' : undefined,
         on: {
           click: function click() {
             if (button.reject) {
@@ -375,7 +379,7 @@ var index = {
                 options.buttons = false;
               }
               if (options.buttons === true) {
-                options.buttons = [{ label: 'ok', key: 'ok', class: 'btn-primary' }];
+                options.buttons = [{ label: 'ok', key: 'ok', class: 'btn-primary', focus: true }];
               }
               if (options.props === undefined) {
                 options.props = {};

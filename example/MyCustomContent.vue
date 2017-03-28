@@ -8,7 +8,7 @@
       </iframe>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" @click="$parent.close()">
+      <button class="btn btn-danger" @click="$parent.close()" ref="focus">
         close
       </button>
     </div>
@@ -21,6 +21,9 @@ export default {
   $modalOptions: {
     size: ['tall', 'lg'],
     static: 'all'
+  },
+  mounted () {
+    this.$refs.focus.focus()
   }
 }
 </script>

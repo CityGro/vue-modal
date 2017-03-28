@@ -13,9 +13,13 @@ const MyContent = Vue.component('my-content', {
         },
         on: {
           click: this.openCustom
-        }
+        },
+        ref: 'focus'
       }, 'open says me')
     ])
+  },
+  mounted () {
+    this.$refs.focus.focus()
   },
   methods: {
     openCustom () {
@@ -71,7 +75,7 @@ new Vue({
                 content: (cb) => cb(MyContent),
                 title: 'My Content',
                 buttons: [
-                  {label: 'Ok', key: 'ok', class: 'btn-primary'},
+                  {label: 'Ok', key: 'ok', class: 'btn-primary', focus: true},
                   {label: 'Cancel', key: 'cancel', class: 'btn-default', reject: true}
                 ]
               })

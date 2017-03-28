@@ -45,6 +45,9 @@ export default Vue.component('cg-modal', {
     setTimeout(() => {
       this.transition = true
     }, 150)
+    if (this.$refs.focus && this.$refs.focus.focus) {
+      this.$refs.focus.focus()
+    }
   },
   beforeDestroy () {
     this.transition = false
@@ -79,7 +82,7 @@ export default Vue.component('cg-modal', {
         'modal-header': true
       }
     }, [
-      h('a', {
+      h('button', {
         class: {'close': true},
         attrs: {
           'aria-label': 'Close'
@@ -102,11 +105,12 @@ export default Vue.component('cg-modal', {
     ]) : null
     // create footer if there are buttons defined
     const footer = (this.buttons) ? h('div', {class: {'modal-footer': true}}, map((button) => {
-      return h('a', {
+      return h('button', {
         class: {
           'btn': true,
           [button.class]: true
         },
+        ref: (button.focus === true) ? 'focus' : undefined,
         on: {
           click () {
             if (button.reject) {

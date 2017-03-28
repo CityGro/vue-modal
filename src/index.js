@@ -167,7 +167,7 @@ export default {
               }
               if (options.buttons === true) {
                 options.buttons = [
-                  {label: 'ok', key: 'ok', class: 'btn-primary'}
+                  {label: 'ok', key: 'ok', class: 'btn-primary', focus: true}
                 ]
               }
               if (options.props === undefined) {

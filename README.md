@@ -59,7 +59,7 @@ new Vue({
 - `buttons: Object[]|boolean` an array of objects describing buttons:
 ```js
 [
-  {label: 'Ok', key: 'ok', class: 'btn-primary'},
+  {label: 'Ok', key: 'ok', class: 'btn-primary', focus: true},
   {label: 'Cancel', key: 'cancel', class: 'btn-default', reject: true}
 ]
 ```

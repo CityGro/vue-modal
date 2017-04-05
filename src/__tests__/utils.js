@@ -6,7 +6,7 @@ import * as utils from '../utils'
 import ContentWrapper from '../ContentWrapper'
 
 describe('utils', () => {
-  describe('resolveContnent', () => {
+  describe('resolveContent', () => {
     let string
     let Component
     let callback

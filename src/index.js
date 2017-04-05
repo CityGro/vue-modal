@@ -8,6 +8,7 @@ import flatten from 'lodash/flattenDeep'
 import assign from 'lodash/assign'
 import property from 'lodash/property'
 import uniqueId from 'lodash/uniqueId'
+import toNumber from 'lodash/toNumber'
 
 import EventEmmitter from 'events'
 
@@ -16,7 +17,7 @@ import $ from 'jquery'
 import Q from 'q'
 
 import ModalWrapper from './Modal'
-import {resolveContent} from './utils'
+import {getOptions, resolveContent} from './utils'
 
 export default {
   install (Vue) {
@@ -63,7 +64,7 @@ export default {
        */
       beforeCreate () {
         /**
-         *
+         * destroy the specified modal
          * @param method
          */
         const onDestroy = (method) => ({id, result}) => {
@@ -79,15 +80,15 @@ export default {
           }
         }
         /**
-         *
+         * close the top-most modal when ESC is pressed
          * @param event
          */
         const onKeydown = (event) => {
-          if (event.keyCode == 27) { // eslint-disable-line eqeqeq
-            try {
-              const id = last(stack)[0]
-              modals.emit('dismiss', id)
-            } catch (e) {
+          if (toNumber(event.keyCode) === 27 && stack.length) {
+            const [id, {Modal}] = last(stack)
+            const options = getOptions(Modal)
+            if (!options.static) {
+              modals.emit('dismiss', {id})
             }
           }
         }
@@ -117,9 +118,9 @@ export default {
          */
         $(document).on('keydown', onKeydown)
         this._unsubscribe = () => {
-          modals.off('open')
-          modals.off('close')
-          modals.off('dismiss')
+          modals.removeAllListeners('open')
+          modals.removeAllListeners('close')
+          modals.removeAllListeners('dismiss')
           $(document).off('keydown', onKeydown)
         }
       },
@@ -154,12 +155,7 @@ export default {
               status.loading = false
               modals.emit('progress', status.loading)
               clearInterval(poll)
-              if (property('options.$modalOptions')(Modal)) {
-                options = assign({}, Modal.options.$modalOptions, options)
-              }
-              if (property('$modalOptions')(Modal)) {
-                options = assign({}, Modal.$modalOptions, options)
-              }
+              options = assign({}, getOptions(Modal), options)
               if (options.buttons === undefined && isString(options.content)) {
                 options.buttons = true
               } else if (options.buttons === undefined) {

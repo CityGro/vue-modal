@@ -12,6 +12,7 @@ var flatten = _interopDefault(require('lodash/flattenDeep'));
 var assign = _interopDefault(require('lodash/assign'));
 var property = _interopDefault(require('lodash/property'));
 var uniqueId = _interopDefault(require('lodash/uniqueId'));
+var toNumber = _interopDefault(require('lodash/toNumber'));
 var EventEmmitter = _interopDefault(require('events'));
 var $ = _interopDefault(require('jquery'));
 var Q = _interopDefault(require('q'));
@@ -32,6 +33,64 @@ var defineProperty = function (obj, key, value) {
 
   return obj;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var slicedToArray = function () {
+  function sliceIterator(arr, i) {
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"]) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  return function (arr, i) {
+    if (Array.isArray(arr)) {
+      return arr;
+    } else if (Symbol.iterator in Object(arr)) {
+      return sliceIterator(arr, i);
+    } else {
+      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    }
+  };
+}();
 
 /**
  * style this component! use bootstrap 3 modal classes
@@ -221,6 +280,10 @@ var resolveContent = function resolveContent(content) {
   }
 };
 
+var getOptions = function getOptions(Modal) {
+  return property('$modalOptions')(Modal) || property('options.$modalOptions')(Modal) || {};
+};
+
 var index = {
   install: function install(Vue$$1) {
     var modals = new EventEmmitter();
@@ -269,7 +332,7 @@ var index = {
         var _this = this;
 
         /**
-         *
+         * destroy the specified modal
          * @param method
          */
         var onDestroy = function onDestroy(method) {
@@ -292,16 +355,20 @@ var index = {
           };
         };
         /**
-         *
+         * close the top-most modal when ESC is pressed
          * @param event
          */
         var onKeydown = function onKeydown(event) {
-          if (event.keyCode == 27) {
-            // eslint-disable-line eqeqeq
-            try {
-              var id = last(stack)[0];
-              modals.emit('dismiss', id);
-            } catch (e) {}
+          if (toNumber(event.keyCode) === 27 && stack.length) {
+            var _last = last(stack),
+                _last2 = slicedToArray(_last, 2),
+                id = _last2[0],
+                Modal = _last2[1].Modal;
+
+            var options = getOptions(Modal);
+            if (!options.static) {
+              modals.emit('dismiss', { id: id });
+            }
           }
         };
         /**
@@ -330,9 +397,9 @@ var index = {
          */
         $(document).on('keydown', onKeydown);
         this._unsubscribe = function () {
-          modals.off('open');
-          modals.off('close');
-          modals.off('dismiss');
+          modals.removeAllListeners('open');
+          modals.removeAllListeners('close');
+          modals.removeAllListeners('dismiss');
           $(document).off('keydown', onKeydown);
         };
       },
@@ -367,12 +434,7 @@ var index = {
               status.loading = false;
               modals.emit('progress', status.loading);
               clearInterval(poll);
-              if (property('options.$modalOptions')(Modal)) {
-                options = assign({}, Modal.options.$modalOptions, options);
-              }
-              if (property('$modalOptions')(Modal)) {
-                options = assign({}, Modal.$modalOptions, options);
-              }
+              options = assign({}, getOptions(Modal), options);
               if (options.buttons === undefined && isString(options.content)) {
                 options.buttons = true;
               } else if (options.buttons === undefined) {

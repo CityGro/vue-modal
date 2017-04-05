@@ -1,4 +1,5 @@
 import isString from 'lodash/isString'
+import property from 'lodash/property'
 
 import ContentWrapper from './ContentWrapper'
 
@@ -18,4 +19,8 @@ export const resolveContent = (content) => {
       return content
     }
   }
+}
+
+export const getOptions = (Modal) => {
+  return property('$modalOptions')(Modal) || property('options.$modalOptions')(Modal) || {}
 }

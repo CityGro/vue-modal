@@ -202,11 +202,13 @@ var ModalWrapper = Vue.component('cg-modal', {
         }, button.class, true),
         ref: button.focus === true ? 'focus' : undefined,
         on: {
-          click: function click() {
-            if (button.reject) {
-              self.dismiss({ key: button.key, label: button.label });
-            } else {
-              self.close({ key: button.key, label: button.label });
+          click: function click(event) {
+            if (event.x !== 0 && event.y !== 0) {
+              if (button.reject) {
+                self.dismiss({ key: button.key, label: button.label });
+              } else {
+                self.close({ key: button.key, label: button.label });
+              }
             }
           }
         }
@@ -359,15 +361,24 @@ var index = {
          * @param event
          */
         var onKeydown = function onKeydown(event) {
-          if (toNumber(event.keyCode) === 27 && stack.length) {
+          if (stack.length) {
             var _last = last(stack),
                 _last2 = slicedToArray(_last, 2),
                 id = _last2[0],
                 Modal = _last2[1].Modal;
 
             var options = getOptions(Modal);
-            if (!options.static) {
-              modals.emit('dismiss', { id: id });
+            switch (toNumber(event.keyCode)) {
+              case 27:
+                if (!options.static) {
+                  modals.emit('dismiss', { id: id });
+                }
+                break;
+              case 13:
+                if (!options.static) {
+                  modals.emit('dismiss', { id: id });
+                }
+                break;
             }
           }
         };

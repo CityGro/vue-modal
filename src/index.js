@@ -84,11 +84,20 @@ export default {
          * @param event
          */
         const onKeydown = (event) => {
-          if (toNumber(event.keyCode) === 27 && stack.length) {
+          if (stack.length) {
             const [id, {Modal}] = last(stack)
             const options = getOptions(Modal)
-            if (!options.static) {
-              modals.emit('dismiss', {id})
+            switch (toNumber(event.keyCode)) {
+              case 27:
+                if (!options.static) {
+                  modals.emit('dismiss', {id})
+                }
+                break
+              case 13:
+                if (!options.static) {
+                  modals.emit('dismiss', {id})
+                }
+                break
             }
           }
         }

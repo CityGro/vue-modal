@@ -112,11 +112,13 @@ export default Vue.component('cg-modal', {
         },
         ref: (button.focus === true) ? 'focus' : undefined,
         on: {
-          click () {
-            if (button.reject) {
-              self.dismiss({key: button.key, label: button.label})
-            } else {
-              self.close({key: button.key, label: button.label})
+          click (event) {
+            if (event.x !== 0 && event.y !== 0) {
+              if (button.reject) {
+                self.dismiss({key: button.key, label: button.label})
+              } else {
+                self.close({key: button.key, label: button.label})
+              }
             }
           }
         }

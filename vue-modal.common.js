@@ -225,7 +225,7 @@ var ModalWrapper = Vue.component('cg-modal', {
       },
       on: {
         click: function click() {
-          if (!self.static) {
+          if (self.static === 'backdrop' || self.static === null) {
             self.dismiss();
           }
         }
@@ -357,7 +357,7 @@ var index = {
           };
         };
         /**
-         * close the top-most modal when ESC is pressed
+         * close the top-most modal when ESC or RETis pressed
          * @param event
          */
         var onKeydown = function onKeydown(event) {
@@ -370,12 +370,12 @@ var index = {
             var options = getOptions(Modal);
             switch (toNumber(event.keyCode)) {
               case 27:
-                if (!options.static) {
+                if (options.static === 'backdrop' || options.static === null) {
                   modals.emit('dismiss', { id: id });
                 }
                 break;
               case 13:
-                if (!options.static) {
+                if (options.static === 'backdrop' || options.static === null) {
                   modals.emit('dismiss', { id: id });
                 }
                 break;

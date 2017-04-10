@@ -135,7 +135,7 @@ export default Vue.component('cg-modal', {
       },
       on: {
         click () {
-          if (!self.static) {
+          if (self.static === 'backdrop' || self.static === null) {
             self.dismiss()
           }
         }

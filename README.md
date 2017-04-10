@@ -70,7 +70,7 @@ new Vue({
 - `props: Object` props to be passed to the `VueComponent` after it is loaded, default: `{}`
 - `size: String|String[]|void` (optional) specify modal size (one of: `'sm'`, `'lg'`, or `'full'`); specify multiple
   options as an array
-- `static: string|null` modal dismissal options (one of null, 'backdrop', 'full')
+- `static: string|null` modal dismissal options (one of `null` or `false`, `'backdrop'`, `'full'` or `true`)
 - `title: String|null` modal title, default: `null`
 - `class: Object` class names to bind to `.modal` (see [vue guide])
 

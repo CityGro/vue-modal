@@ -87,14 +87,14 @@ export default Vue.component('cg-modal', {
         attrs: {
           'aria-label': 'Close'
         }
-      }, (self.static === 'all') ? [] : [
+      }, (self.static) ? [] : [
         h('span', {
           attrs: {
             'aria-hidden': true
           },
           on: {
             click () {
-              if (self.static !== 'all') {
+              if (!self.static) {
                 self.dismiss()
               }
             }
@@ -135,7 +135,7 @@ export default Vue.component('cg-modal', {
       },
       on: {
         click () {
-          if (self.static === 'backdrop' || self.static === null) {
+          if (!self.static) {
             self.dismiss()
           }
         }

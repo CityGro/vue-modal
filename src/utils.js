@@ -22,5 +22,12 @@ export const resolveContent = (content) => {
 }
 
 export const getOptions = (Modal) => {
-  return property('$modalOptions')(Modal) || property('options.$modalOptions')(Modal) || {}
+  let options = property('$modalOptions')(Modal)
+  if (!options) {
+    options = property('options.$modalOptions')(Modal)
+  }
+  if (!options) {
+    options = {}
+  }
+  return options
 }

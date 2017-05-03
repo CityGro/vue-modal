@@ -85,16 +85,15 @@ export default {
          */
         const onKeydown = (event) => {
           if (stack.length) {
-            const [id, {Modal}] = last(stack)
-            const options = getOptions(Modal)
+            const [id, options] = last(stack)
             switch (toNumber(event.keyCode)) {
               case 27:
-                if (options.static === 'backdrop' || options.static === null) {
+                if (!options.static) {
                   modals.emit('dismiss', {id})
                 }
                 break
               case 13:
-                if (options.static === 'backdrop' || options.static === null) {
+                if (!options.static) {
                   modals.emit('dismiss', {id})
                 }
                 break
@@ -144,7 +143,7 @@ export default {
      * @param {object} options.props - data to pass into the modal instance
      * @param {string|null} options.title - modal title
      * @param {string|string[]|void} options.size - modal size (one of 'sm', 'lg', or 'full' or multiple in an array)
-     * @param {string|null} options.static - modal dismissal options (one of null, 'backdrop', 'full')
+     * @param {boolean} [options.static=false] - force interaction to dismiss
      * @param {object|null} options.class - additional classes to add to the modal-dialog
      */
     const openModal = (options) => {
@@ -179,7 +178,9 @@ export default {
                 options.props = {}
               }
               if (options.static === undefined) {
-                options.static = null
+                options.static = false
+              } else {
+                options.static = !!options.static
               }
               if (options.title === undefined) {
                 options.title = null

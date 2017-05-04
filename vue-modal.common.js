@@ -182,13 +182,13 @@ var ModalWrapper = Vue.component('cg-modal', {
       attrs: {
         'aria-label': 'Close'
       }
-    }, self.static === 'all' ? [] : [h('span', {
+    }, self.static ? [] : [h('span', {
       attrs: {
         'aria-hidden': true
       },
       on: {
         click: function click() {
-          if (self.static !== 'all') {
+          if (!self.static) {
             self.dismiss();
           }
         }
@@ -225,7 +225,7 @@ var ModalWrapper = Vue.component('cg-modal', {
       },
       on: {
         click: function click() {
-          if (self.static === 'backdrop' || self.static === null) {
+          if (!self.static) {
             self.dismiss();
           }
         }
@@ -283,7 +283,14 @@ var resolveContent = function resolveContent(content) {
 };
 
 var getOptions = function getOptions(Modal) {
-  return property('$modalOptions')(Modal) || property('options.$modalOptions')(Modal) || {};
+  var options = property('$modalOptions')(Modal);
+  if (!options) {
+    options = property('options.$modalOptions')(Modal);
+  }
+  if (!options) {
+    options = {};
+  }
+  return options;
 };
 
 var index = {
@@ -357,7 +364,7 @@ var index = {
           };
         };
         /**
-         * close the top-most modal when ESC or RETis pressed
+         * close the topmost modal when ESC is pressed
          * @param event
          */
         var onKeydown = function onKeydown(event) {
@@ -365,17 +372,11 @@ var index = {
             var _last = last(stack),
                 _last2 = slicedToArray(_last, 2),
                 id = _last2[0],
-                Modal = _last2[1].Modal;
+                options = _last2[1];
 
-            var options = getOptions(Modal);
             switch (toNumber(event.keyCode)) {
               case 27:
-                if (options.static === 'backdrop' || options.static === null) {
-                  modals.emit('dismiss', { id: id });
-                }
-                break;
-              case 13:
-                if (options.static === 'backdrop' || options.static === null) {
+                if (!options.static) {
                   modals.emit('dismiss', { id: id });
                 }
                 break;
@@ -425,7 +426,7 @@ var index = {
      * @param {object} options.props - data to pass into the modal instance
      * @param {string|null} options.title - modal title
      * @param {string|string[]|void} options.size - modal size (one of 'sm', 'lg', or 'full' or multiple in an array)
-     * @param {string|null} options.static - modal dismissal options (one of null, 'backdrop', 'full')
+     * @param {boolean} [options.static=false] - force interaction to dismiss
      * @param {object|null} options.class - additional classes to add to the modal-dialog
      */
     var openModal = function openModal(options) {
@@ -458,7 +459,9 @@ var index = {
                 options.props = {};
               }
               if (options.static === undefined) {
-                options.static = null;
+                options.static = false;
+              } else {
+                options.static = !!options.static;
               }
               if (options.title === undefined) {
                 options.title = null;

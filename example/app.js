@@ -28,7 +28,11 @@ const MyContent = Vue.component('my-content', {
         class: {
           death: true
         }
-      })
+      }).result.then(
+        (res) => console.log('[@citygro/vue-modal] my-custom-content closed', res)
+      ).catch(
+        (err) => console.error('[@citygro/vue-modal] my-custom-content dismissed')
+      )
     }
   }
 })
@@ -80,12 +84,12 @@ new Vue({
                 ]
               })
               result.then(
-                (res) => console.log('[@citygro/vue-modal] result', res.key)
+                (res) => console.log('[@citygro/vue-modal] my-content closed', res)
               ).catch(
-                (err) => console.error('[@citygro/vue-modal] result', err.key)
+                (err) => console.error('[@citygro/vue-modal] my-content dismissed', err)
               )
               mounted.then((content) => {
-                console.log('[@citygro/vue-modal] mounted', content)
+                console.log('[@citygro/vue-modal] my-content mounted', content)
               }).catch(console.error)
             }
           }
@@ -98,11 +102,15 @@ new Vue({
           on: {
             click: () => {
               this.$openModal({
-                content: "This modal has static = 'backdrop'",
+                content: "This modal has static = true",
                 title: 'My Small Content',
                 size: 'sm',
-                static: 'backdrop'
-              })
+                static: true
+              }).result.then(
+                (res) => console.log('[@citygro/vue-modal] text-content closed', res)
+              ).catch(
+                (err) => console.error('[@citygro/vue-modal] text-content dismissed', err)
+              )
             }
           }
         }, 'open small content'),
@@ -113,14 +121,18 @@ new Vue({
           },
           on: {
             click: () => {
-              Vue.$openModal({
+              this.$openModal({
                 content: Vue.component('inline-content', {
                   render (h) {
                     return h('p', null, ['this component is defined inline'])
                   }
                 }),
                 title: 'Inline Component'
-              })
+              }).result.then(
+                (res) => console.log('[@citygro/vue-modal] inline-content closed', res)
+              ).catch(
+                (err) => console.error('[@citygro/vue-modal] inline-content dismissed', err)
+              )
             }
           }
         }, 'open large content'),
@@ -133,7 +145,11 @@ new Vue({
             click: () => {
               this.$openModal({
                 content: (resolve) => require(['./MyCustomContent'], resolve)
-              })
+              }).result.then(
+                (res) => console.log('[@citygro/vue-modal]', res)
+              ).catch(
+                (err) => console.error('[@citygro/vue-modal]', err)
+              )
             }
           }
         }, 'open custom content')

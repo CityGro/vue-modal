@@ -80,7 +80,7 @@ export default {
           }
         }
         /**
-         * close the top-most modal when ESC or RETis pressed
+         * close the topmost modal when ESC is pressed
          * @param event
          */
         const onKeydown = (event) => {
@@ -88,11 +88,6 @@ export default {
             const [id, options] = last(stack)
             switch (toNumber(event.keyCode)) {
               case 27:
-                if (!options.static) {
-                  modals.emit('dismiss', {id})
-                }
-                break
-              case 13:
                 if (!options.static) {
                   modals.emit('dismiss', {id})
                 }

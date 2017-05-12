@@ -495,6 +495,7 @@ var index = {
         })
       };
     };
+    Vue$$1.$openModal = $openModal;
     Vue$$1.mixin({
       methods: { $openModal: $openModal }
     });

@@ -29,9 +29,9 @@ const MyContent = Vue.component('my-content', {
           death: true
         }
       }).result.then(
-        (res) => console.log('[@citygro/vue-modal] my-custom-content closed', res)
+        (res) => console.log('[@citygro/vue-modal example] my-custom-content closed', res)
       ).catch(
-        (err) => console.error('[@citygro/vue-modal] my-custom-content dismissed')
+        (err) => console.error('[@citygro/vue-modal example] my-custom-content dismissed')
       )
     }
   }
@@ -84,12 +84,12 @@ new Vue({
                 ]
               })
               result.then(
-                (res) => console.log('[@citygro/vue-modal] my-content closed', res)
+                (res) => console.log('[@citygro/vue-modal example] my-content closed', res)
               ).catch(
-                (err) => console.error('[@citygro/vue-modal] my-content dismissed', err)
+                (err) => console.error('[@citygro/vue-modal example] my-content dismissed', err)
               )
               mounted.then((content) => {
-                console.log('[@citygro/vue-modal] my-content mounted', content)
+                console.log('[@citygro/vue-modal example] my-content mounted', content)
               }).catch(console.error)
             }
           }
@@ -107,9 +107,9 @@ new Vue({
                 size: 'sm',
                 static: true
               }).result.then(
-                (res) => console.log('[@citygro/vue-modal] text-content closed', res)
+                (res) => console.log('[@citygro/vue-modal example] text-content closed', res)
               ).catch(
-                (err) => console.error('[@citygro/vue-modal] text-content dismissed', err)
+                (err) => console.error('[@citygro/vue-modal example] text-content dismissed', err)
               )
             }
           }
@@ -129,9 +129,9 @@ new Vue({
                 }),
                 title: 'Inline Component'
               }).result.then(
-                (res) => console.log('[@citygro/vue-modal] inline-content closed', res)
+                (res) => console.log('[@citygro/vue-modal example] inline-content closed', res)
               ).catch(
-                (err) => console.error('[@citygro/vue-modal] inline-content dismissed', err)
+                (err) => console.error('[@citygro/vue-modal example] inline-content dismissed', err)
               )
             }
           }
@@ -146,9 +146,9 @@ new Vue({
               this.$openModal({
                 content: (resolve) => require(['./MyCustomContent'], resolve)
               }).result.then(
-                (res) => console.log('[@citygro/vue-modal]', res)
+                (res) => console.log('[@citygro/vue-modal example]', res)
               ).catch(
-                (err) => console.error('[@citygro/vue-modal]', err)
+                (err) => console.error('[@citygro/vue-modal example]', err)
               )
             }
           }
@@ -158,6 +158,15 @@ new Vue({
         on: {
           progress: (loading) => {
             self.modalLoading = loading
+          },
+          open: () => {
+            console.log('[@citygro/vue-modal example] open event')
+          },
+          close: () => {
+            console.log('[@citygro/vue-modal example] close event')
+          },
+          dismiss: () => {
+            console.log('[@citygro/vue-modal example] dismiss event')
           }
         }
       })

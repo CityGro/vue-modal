@@ -360,6 +360,7 @@ var index = {
               }
               stack.splice(index, 1);
               _this.modals = _this.getModals();
+              _this.$emit(method);
             }
           };
         };
@@ -388,6 +389,7 @@ var index = {
          */
         modals.on('open', function () {
           _this.modals = _this.getModals();
+          _this.$emit('open');
         });
         /**
          * update loading state
@@ -429,7 +431,7 @@ var index = {
      * @param {boolean} [options.static=false] - force interaction to dismiss
      * @param {object|null} options.class - additional classes to add to the modal-dialog
      */
-    var openModal = function openModal(options) {
+    var $openModal = function $openModal(options) {
       if (!options.content) {
         throw new Error('options.content is a required argument!', options);
       }
@@ -493,8 +495,9 @@ var index = {
         })
       };
     };
-    Vue$$1.$openModal = openModal;
-    Vue$$1.prototype.$openModal = openModal;
+    Vue$$1.mixin({
+      methods: { $openModal: $openModal }
+    });
   }
 };
 

@@ -77,6 +77,7 @@ export default {
             }
             stack.splice(index, 1)
             this.modals = this.getModals()
+            this.$emit(method)
           }
         }
         /**
@@ -100,6 +101,7 @@ export default {
          */
         modals.on('open', () => {
           this.modals = this.getModals()
+          this.$emit('open')
         })
         /**
          * update loading state
@@ -141,7 +143,7 @@ export default {
      * @param {boolean} [options.static=false] - force interaction to dismiss
      * @param {object|null} options.class - additional classes to add to the modal-dialog
      */
-    const openModal = (options) => {
+    const $openModal = function (options) {
       if (!options.content) {
         throw new Error('options.content is a required argument!', options)
       }
@@ -207,7 +209,8 @@ export default {
         })
       }
     }
-    Vue.$openModal = openModal
-    Vue.prototype.$openModal = openModal
+    Vue.mixin({
+      methods: {$openModal}
+    })
   }
 }

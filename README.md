@@ -3,8 +3,14 @@
 [![npm downloads](https://img.shields.io/npm/dt/@citygro/vue-modal.svg)](https://npmjs.org/package/@citygro/vue-modal)
 [![npm version](https://img.shields.io/npm/v/@citygro/vue-modal.svg)](https://npmjs.org/package/@citygro/vue-modal)
 
-@citygro/vue-modal(3) -- reusable modal component for vue 2
-===========================================================
+@citygro/vue-modal
+==================
+
+reusable modal component for vue 2
+
+```
+$ yarn add @citygro/vue-modal
+```
 
 see `./example` for a working demonstration
 

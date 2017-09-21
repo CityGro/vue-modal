@@ -1,6 +1,6 @@
 {
   "name": "@citygro/vue-modal",
-  "version": "5.2.3",
+  "version": "5.2.4",
   "description": "reusable modal component for vue 2",
   "main": "vue-modal.common.js",
   "jest": {

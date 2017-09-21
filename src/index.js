@@ -210,7 +210,6 @@ export default {
       }
     }
     Vue.$openModal = $openModal
-    Vue.prototype.$openModal = $openModal
     Vue.mixin({
       methods: {$openModal}
     })

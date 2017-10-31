@@ -1,7 +1,7 @@
+import ContentWrapper from './ContentWrapper'
+import isFunction from 'lodash/isFunction'
 import isString from 'lodash/isString'
 import property from 'lodash/property'
-
-import ContentWrapper from './ContentWrapper'
 
 /**
  * wraps string and VueComponents in an async require compatible callback function
@@ -12,7 +12,7 @@ import ContentWrapper from './ContentWrapper'
 export const resolveContent = (content) => {
   if (isString(content)) {
     return (cb) => cb(ContentWrapper(content))
-  } else if (typeof content === 'function') {
+  } else if (isFunction(content)) {
     if (content.name === 'VueComponent') {
       return (cb) => cb(content)
     } else {

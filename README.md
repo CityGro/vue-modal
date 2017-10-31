@@ -6,13 +6,25 @@
 @citygro/vue-modal
 ==================
 
-reusable modal component for vue 2
+reusable modal component for vue 2; designed to work with bootstrap 3 styles.
+
+
+see `./example` for a working demonstration!
+
+```
+git clone https://gitlab.com/citygro/vue-modal
+cd vue-modal
+yarn
+yarn start
+```
+
+if you're impressed, you'll want to add this to your project immediately:
 
 ```
 $ yarn add @citygro/vue-modal
 ```
 
-see `./example` for a working demonstration
+the example project is a good reference.
 
 ## overview
 
@@ -112,3 +124,8 @@ site will take precedence.
 
 modal components have bootstrap modal classes
 
+## issues?
+
+if you get stuck, you can catch us on [#citygro:matrix.org](https://riot.im/app/#/room/#citygro:matrix.org)
+
+found a bug? [we'd be happy to fix it!](https://gitlab.com/citygro/vue-modal/issues).

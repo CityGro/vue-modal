@@ -2,22 +2,23 @@
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
+var $ = _interopDefault(require('jquery'));
+var EventEmmitter = _interopDefault(require('events'));
+var Vue = _interopDefault(require('vue'));
+var map = _interopDefault(require('lodash/fp/map'));
+var includes = _interopDefault(require('lodash/fp/includes'));
+var Q = _interopDefault(require('q'));
+var assign = _interopDefault(require('lodash/assign'));
 var findIndex = _interopDefault(require('lodash/fp/findIndex'));
 var first = _interopDefault(require('lodash/fp/first'));
+var flatten = _interopDefault(require('lodash/flattenDeep'));
 var fromPairs = _interopDefault(require('lodash/fp/fromPairs'));
 var isString = _interopDefault(require('lodash/isString'));
 var last = _interopDefault(require('lodash/fp/last'));
-var map = _interopDefault(require('lodash/fp/map'));
-var flatten = _interopDefault(require('lodash/flattenDeep'));
-var assign = _interopDefault(require('lodash/assign'));
-var property = _interopDefault(require('lodash/property'));
-var uniqueId = _interopDefault(require('lodash/uniqueId'));
 var toNumber = _interopDefault(require('lodash/toNumber'));
-var EventEmmitter = _interopDefault(require('events'));
-var $ = _interopDefault(require('jquery'));
-var Q = _interopDefault(require('q'));
-var Vue = _interopDefault(require('vue'));
-var includes = _interopDefault(require('lodash/fp/includes'));
+var uniqueId = _interopDefault(require('lodash/uniqueId'));
+var isFunction = _interopDefault(require('lodash/isFunction'));
+var property = _interopDefault(require('lodash/property'));
 
 var defineProperty = function (obj, key, value) {
   if (key in obj) {
@@ -271,7 +272,7 @@ var resolveContent = function resolveContent(content) {
     return function (cb) {
       return cb(ContentWrapper(content));
     };
-  } else if (typeof content === 'function') {
+  } else if (isFunction(content)) {
     if (content.name === 'VueComponent') {
       return function (cb) {
         return cb(content);
@@ -445,6 +446,7 @@ var index = {
         mounted: Q.Promise(function (resolve, reject) {
           try {
             resolveContent(options.content)(function (Modal) {
+              Modal = Modal.default ? Modal.default : Modal;
               status.loading = false;
               modals.emit('progress', status.loading);
               clearInterval(poll);

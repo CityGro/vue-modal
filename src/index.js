@@ -1,22 +1,17 @@
+import $ from 'jquery'
+import EventEmmitter from 'events'
+import ModalWrapper from './Modal'
+import Q from 'q'
+import assign from 'lodash/assign'
 import findIndex from 'lodash/fp/findIndex'
 import first from 'lodash/fp/first'
+import flatten from 'lodash/flattenDeep'
 import fromPairs from 'lodash/fp/fromPairs'
 import isString from 'lodash/isString'
 import last from 'lodash/fp/last'
 import map from 'lodash/fp/map'
-import flatten from 'lodash/flattenDeep'
-import assign from 'lodash/assign'
-import property from 'lodash/property'
-import uniqueId from 'lodash/uniqueId'
 import toNumber from 'lodash/toNumber'
-
-import EventEmmitter from 'events'
-
-import $ from 'jquery'
-
-import Q from 'q'
-
-import ModalWrapper from './Modal'
+import uniqueId from 'lodash/uniqueId'
 import {getOptions, resolveContent} from './utils'
 
 export default {
@@ -157,6 +152,7 @@ export default {
         mounted: Q.Promise((resolve, reject) => {
           try {
             resolveContent(options.content)((Modal) => {
+              Modal = (Modal.default) ? Modal.default : Modal
               status.loading = false
               modals.emit('progress', status.loading)
               clearInterval(poll)

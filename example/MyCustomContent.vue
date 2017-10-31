@@ -8,12 +8,19 @@
       </iframe>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" @click="$parent.close()" ref="focus">
+      <button class="btn btn-danger" @click="$parent.close({myCustomProp: true})" ref="focus">
         close
       </button>
     </div>
   </div>
 </template>
+
+<style lang="css" scoped>
+iframe {
+  width: 100%;
+  height: 450px;
+}
+</style>
 
 <script>
 export default {
@@ -27,10 +34,3 @@ export default {
   }
 }
 </script>
-
-<style lang="css" scoped>
-iframe {
-  width: 100%;
-  height: 450px;
-}
-</style>

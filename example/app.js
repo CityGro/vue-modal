@@ -26,7 +26,7 @@ const MyContent = Vue.component('my-content', {
       this.$openModal({
         content: (resolve) => require(['./MyCustomContent'], resolve),
         class: {
-          death: true
+          darkness: true
         }
       }).result.then(
         (res) => console.log('[@citygro/vue-modal example] my-custom-content closed', res)
@@ -146,9 +146,9 @@ new Vue({
               this.$openModal({
                 content: (resolve) => require(['./MyCustomContent'], resolve)
               }).result.then(
-                (res) => console.log('[@citygro/vue-modal example]', res)
+                (res) => console.log('[@citygro/vue-modal example] closed', res)
               ).catch(
-                (err) => console.error('[@citygro/vue-modal example]', err)
+                (err) => console.error('[@citygro/vue-modal example] dismissed', err)
               )
             }
           }

@@ -417,6 +417,9 @@ var index = {
           modals.removeAllListeners('dismiss');
           $(document).off('keydown', onKeydown);
         };
+        if (document.activeElement && document.activeElement.blur) {
+          document.activeElement.blur();
+        }
       },
       beforeDestroy: function beforeDestroy() {
         this._unsubscribe();

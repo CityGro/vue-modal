@@ -417,9 +417,6 @@ var index = {
           modals.removeAllListeners('dismiss');
           $(document).off('keydown', onKeydown);
         };
-        if (document.activeElement && document.activeElement.blur) {
-          document.activeElement.blur();
-        }
       },
       beforeDestroy: function beforeDestroy() {
         this._unsubscribe();
@@ -448,6 +445,9 @@ var index = {
         result: result.promise,
         mounted: Q.Promise(function (resolve, reject) {
           try {
+            if (document.activeElement && document.activeElement.blur) {
+              document.activeElement.blur();
+            }
             resolveContent(options.content)(function (Modal) {
               Modal = Modal.default ? Modal.default : Modal;
               status.loading = false;

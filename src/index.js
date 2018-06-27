@@ -123,9 +123,6 @@ export default {
           modals.removeAllListeners('dismiss')
           $(document).off('keydown', onKeydown)
         }
-        if (document.activeElement && document.activeElement.blur) {
-          document.activeElement.blur()
-        }
       },
       beforeDestroy () {
         this._unsubscribe()
@@ -154,6 +151,9 @@ export default {
         result: result.promise,
         mounted: Q.Promise((resolve, reject) => {
           try {
+            if (document.activeElement && document.activeElement.blur) {
+              document.activeElement.blur()
+            }
             resolveContent(options.content)((Modal) => {
               Modal = (Modal.default) ? Modal.default : Modal
               status.loading = false

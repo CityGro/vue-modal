@@ -35,6 +35,7 @@ export default {
             title: options.title,
             buttons: options.buttons,
             size: options.size,
+            instance: options.instance,
             modals,
             static: options.static
           },
@@ -143,12 +144,28 @@ export default {
         throw new Error('options.content is a required argument!', options)
       }
       const result = Q.defer()
+      const instance = Q.defer()
       let status = {loading: true}
       const poll = setInterval(() => {
         modals.emit('progress', status.loading)
       }, 10)
       return {
         result: result.promise,
+        instance: instance.promise,
+        close: (options) => {
+          const close = Q.defer()
+          instance.promise.then((componentInstance) => {
+            close.resolve(componentInstance.close(options))
+          })
+          return close.promise
+        },
+        dismiss: (options) => {
+          const dismiss = Q.defer()
+          instance.promise.then((componentInstance) => {
+            dismiss.resolve(componentInstance.dismiss(options))
+          })
+          return dismiss.promise
+        },
         mounted: Q.Promise((resolve, reject) => {
           try {
             if (document.activeElement && document.activeElement.blur) {
@@ -195,6 +212,7 @@ export default {
                   props: options.props,
                   reject: result.reject,
                   resolve: result.resolve,
+                  instance: instance.resolve,
                   size: flatten([options.size]),
                   static: options.static,
                   title: options.title

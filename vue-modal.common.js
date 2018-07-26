@@ -125,6 +125,9 @@ var ModalWrapper = Vue.component('cg-modal', {
         return { key: 'ok' };
       }
     },
+    instance: {
+      type: Function
+    },
     static: {
       required: true
     }
@@ -133,6 +136,11 @@ var ModalWrapper = Vue.component('cg-modal', {
     return {
       transition: false
     };
+  },
+  created: function created() {
+    if (this.instance) {
+      this.instance(this);
+    }
   },
   mounted: function mounted() {
     var _this = this;
@@ -316,6 +324,7 @@ var index = {
               title: options.title,
               buttons: options.buttons,
               size: options.size,
+              instance: options.instance,
               modals: modals,
               static: options.static
             },
@@ -437,12 +446,28 @@ var index = {
         throw new Error('options.content is a required argument!', options);
       }
       var result = Q.defer();
+      var instance = Q.defer();
       var status = { loading: true };
       var poll = setInterval(function () {
         modals.emit('progress', status.loading);
       }, 10);
       return {
         result: result.promise,
+        instance: instance.promise,
+        close: function close(options) {
+          var close = Q.defer();
+          instance.promise.then(function (componentInstance) {
+            close.resolve(componentInstance.close(options));
+          });
+          return close.promise;
+        },
+        dismiss: function dismiss(options) {
+          var dismiss = Q.defer();
+          instance.promise.then(function (componentInstance) {
+            dismiss.resolve(componentInstance.dismiss(options));
+          });
+          return dismiss.promise;
+        },
         mounted: Q.Promise(function (resolve, reject) {
           try {
             if (document.activeElement && document.activeElement.blur) {
@@ -487,6 +512,7 @@ var index = {
                   props: options.props,
                   reject: result.reject,
                   resolve: result.resolve,
+                  instance: instance.resolve,
                   size: flatten([options.size]),
                   static: options.static,
                   title: options.title

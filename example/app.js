@@ -31,7 +31,7 @@ const MyContent = Vue.component('my-content', {
       }).result.then(
         (res) => console.log('[@citygro/vue-modal example] my-custom-content closed', res)
       ).catch(
-        (err) => console.error('[@citygro/vue-modal example] my-custom-content dismissed')
+        (err) => console.error('[@citygro/vue-modal example] my-custom-content dismissed', err)
       )
     }
   }
@@ -41,6 +41,29 @@ new Vue({
   data () {
     return {
       modalLoading: false
+    }
+  },
+  methods: {
+    openThenClose () {
+      const openModalResults = this.$openModal({
+        content: 'this component will be closed by an external source in 3 seconds'
+      })
+      openModalResults.result.then(
+        (res) => console.log('[@citygro/vue-modal openThenClose] closed', res)
+      ).catch(
+        (err) => console.error('[@citygro/vue-modal openThenClose] dismissed', err)
+      )
+      openModalResults.instance.then((modalInstance) => {
+        console.log('[@citygro/vue-modal openThenClose] we have an instance', {modalInstance})
+      })
+      setTimeout(
+        () => {
+          openModalResults.close({closedExternally: true}).then((result) => {
+            console.log('[@citygro/vue-modal openThenClose] we have closed the modal from the outside', {result})
+          })
+        },
+        3000
+      )
     }
   },
   render (h) {
@@ -102,7 +125,7 @@ new Vue({
           on: {
             click: () => {
               this.$openModal({
-                content: "This modal has static = true",
+                content: 'This modal has static = true',
                 title: 'My Small Content',
                 size: 'sm',
                 static: true
@@ -152,7 +175,18 @@ new Vue({
               )
             }
           }
-        }, 'open custom content')
+        }, 'open custom content'),
+        h('a', {
+          class: {
+            'btn': true,
+            'btn-default': true
+          },
+          on: {
+            click: () => {
+              this.openThenClose()
+            }
+          }
+        }, 'open a modal that will be closed by the triggering component')
       ]),
       h('modal-view', {
         on: {

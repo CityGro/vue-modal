@@ -70,7 +70,7 @@ new Vue({
 
 ## api
 
-### `$openModal(options: Object): {result: Promise, mounted: Promise}`
+### `$openModal(options: Object): {mounted, result, instance, close, dismiss}`
 
 #### options
 
@@ -98,10 +98,13 @@ new Vue({
  
 [vue guide]: https://vuejs.org/v2/guide/class-and-style.html
 
-#### return `{result: Promise<void, Error>, mounted: Promise<VueComponent, Error>`
+#### return `{mounted, result, instance, close, dismiss}`
 
 - `mounted: Promise<VueComponent, Error>` a promise for the modal component
 - `result: Promise<void, Error>` a `Promise` that is resolved (close) or rejected (dismiss) depending on user input
+- `instance: Promise<VueComponent>` a promise that resolves to the modal component instance that is created for that specific call of `$openModal`; It is not the vue component instance of the content, but of the modal which is `$parent` to the content.
+- `close: Function(options)<Promise<void>>` a function which waits for `instance` to resolve, then runs the `close` method of that instance with the provided `options`. Like running `content.$parent.close(options)` from inside of the modal content component, but accessible from the context of where the modal was opened. Useful for closing progress/loading blockers.
+- `dismiss: Function(options)<Promise<void>>` a function which waits for `instance` to resolve, then runs the `dismiss` method of that instance with the provided `options`. Like running `content.$parent.dismiss(options)` from inside of the modal content component, but accessible from the context of where the modal was opened. Useful for closing progress/loading blockers.
 
 ### `content.$parent.close(options: {key: String})`
 

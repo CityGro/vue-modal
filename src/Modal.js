@@ -32,6 +32,9 @@ export default Vue.component('cg-modal', {
       type: Object,
       default: () => ({key: 'ok'})
     },
+    instance: {
+      type: Function
+    },
     static: {
       required: true
     }
@@ -39,6 +42,11 @@ export default Vue.component('cg-modal', {
   data () {
     return {
       transition: false
+    }
+  },
+  created () {
+    if (this.instance) {
+      this.instance(this)
     }
   },
   mounted () {

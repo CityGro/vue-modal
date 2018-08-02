@@ -10,6 +10,7 @@ import fromPairs from 'lodash/fp/fromPairs'
 import isString from 'lodash/isString'
 import last from 'lodash/fp/last'
 import map from 'lodash/fp/map'
+import pkg from '../package.json'
 import toNumber from 'lodash/toNumber'
 import uniqueId from 'lodash/uniqueId'
 import {getOptions, resolveContent} from './utils'
@@ -230,5 +231,6 @@ export default {
     Vue.mixin({
       methods: {$openModal}
     })
+    console.log('installed @citygro/vue-modal', pkg.version)
   }
 }

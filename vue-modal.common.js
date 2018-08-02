@@ -260,6 +260,119 @@ var ModalWrapper = Vue.component('cg-modal', {
   }
 });
 
+var name = "@citygro/vue-modal";
+var version = "5.3.0";
+var description = "reusable modal component for vue 2";
+var main = "vue-modal.common.js";
+var jest = {
+  rootDir: "src",
+  moduleFileExtensions: ["jsx", "js", "json"],
+  testPathIgnorePatterns: ["<rootDir>/(build|docs|node_modules)/"],
+  testEnvironment: "jsdom"
+};
+var homepage = "https://gitlab.com/citygro/vue-modal";
+var repository = "gitlab.com:citygro/vue-modal.git";
+var author = "carlos killpack <carlos@citygro.com>";
+var license = "Apache-2.0";
+var keywords = ["vue2", "bootstrap", "modal", "component", "vue"];
+var eslintConfig = {
+  parser: "babel-eslint",
+  parserOptions: {
+    ecmaVersion: 6,
+    sourceType: "module",
+    ecmaFeatures: {
+      jsx: true
+    }
+  },
+  "extends": "standard"
+};
+var babel = {
+  env: {
+    cjs: {
+      presets: ["es2015", "stage-2"]
+    },
+    es: {
+      presets: [["es2015", {
+        modules: false
+      }], "stage-2"]
+    },
+    test: {
+      presets: ["es2015", "stage-2"]
+    }
+  },
+  plugins: ["transform-vue-jsx"]
+};
+var scripts = {
+  lint: "eslint src",
+  test: "jest",
+  start: "cross-env BABEL_ENV=test webpack-dev-server --config example/webpack.conf.js",
+  build: "npm run build:cjs",
+  "build:cjs": "rollup -c rollup.conf.js"
+};
+var peerDependencies = {
+  vue: ">=2.1.0"
+};
+var devDependencies = {
+  "babel-cli": "^6.18.0",
+  "babel-core": "^6.20.0",
+  "babel-eslint": "^7.1.1",
+  "babel-helper-vue-jsx-merge-props": "^2.0.2",
+  "babel-jest": "^18.0.0",
+  "babel-loader": "^6.2.9",
+  "babel-plugin-external-helpers": "^6.18.0",
+  "babel-plugin-syntax-jsx": "^6.18.0",
+  "babel-plugin-transform-runtime": "^6.15.0",
+  "babel-plugin-transform-vue-jsx": "^3.2.0",
+  "babel-polyfill": "^6.20.0",
+  "babel-preset-es2015": "^6.18.0",
+  "babel-preset-stage-2": "^6.18.0",
+  "babel-runtime": "^6.20.0",
+  "cross-env": "^3.1.3",
+  "css-loader": "^0.27.3",
+  eslint: "^3.12.1",
+  "eslint-config-standard": "^6.2.1",
+  "eslint-plugin-promise": "^3.4.0",
+  "eslint-plugin-standard": "^2.0.1",
+  "html-webpack-plugin": "^2.28.0",
+  jest: "^18.1.0",
+  redux: "^3.6.0",
+  "resolve-url-loader": "^2.0.2",
+  rimraf: "^2.5.4",
+  rollup: "^0.37.0",
+  "rollup-plugin-babel": "^2.7.1",
+  "rollup-plugin-json": "^3.0.0",
+  "style-loader": "^0.13.1",
+  vue: "^2.2.4",
+  "vue-loader": "^11.1.4",
+  "vue-style-loader": "^2.0.4",
+  "vue-template-compiler": "^2.2.4",
+  webpack: "^2.2.1",
+  "webpack-dev-server": "^1.16.2"
+};
+var dependencies = {
+  jquery: "^3.1.1",
+  lodash: "^4.17.2",
+  q: "^1.4.1"
+};
+var pkg = {
+  name: name,
+  version: version,
+  description: description,
+  main: main,
+  jest: jest,
+  homepage: homepage,
+  repository: repository,
+  author: author,
+  license: license,
+  keywords: keywords,
+  eslintConfig: eslintConfig,
+  babel: babel,
+  scripts: scripts,
+  peerDependencies: peerDependencies,
+  devDependencies: devDependencies,
+  dependencies: dependencies
+};
+
 var ContentWrapper = (function (content) {
   return Vue.component('cg-content-wrapper', {
     name: 'cg-content-wrapper',
@@ -530,6 +643,7 @@ var index = {
     Vue$$1.mixin({
       methods: { $openModal: $openModal }
     });
+    console.log('installed @citygro/vue-modal', pkg.version);
   }
 };
 

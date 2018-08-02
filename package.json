@@ -71,10 +71,8 @@
     "lint": "eslint src",
     "test": "jest",
     "start": "cross-env BABEL_ENV=test webpack-dev-server --config example/webpack.conf.js",
-    "build": "npm run build:cjs && npm run build:umd",
-    "build:umd": "webpack --config webpack.conf.umd.js",
-    "build:cjs": "rollup -c rollup.conf.cjs.js",
-    "prepublish": "npm run build && npm test"
+    "build": "npm run build:cjs",
+    "build:cjs": "rollup -c rollup.conf.js"
   },
   "peerDependencies": {
     "vue": ">=2.1.0"
@@ -107,6 +105,7 @@
     "rimraf": "^2.5.4",
     "rollup": "^0.37.0",
     "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-json": "^3.0.0",
     "style-loader": "^0.13.1",
     "vue": "^2.2.4",
     "vue-loader": "^11.1.4",

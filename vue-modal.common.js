@@ -5,14 +5,13 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var $ = _interopDefault(require('jquery'));
 var EventEmmitter = _interopDefault(require('events'));
 var Vue = _interopDefault(require('vue'));
-var map = _interopDefault(require('lodash/fp/map'));
-var includes = _interopDefault(require('lodash/fp/includes'));
+var includes = _interopDefault(require('lodash/includes'));
 var Q = _interopDefault(require('q'));
 var assign = _interopDefault(require('lodash/assign'));
+var clone = _interopDefault(require('lodash/clone'));
 var findIndex = _interopDefault(require('lodash/fp/findIndex'));
 var first = _interopDefault(require('lodash/fp/first'));
 var flatten = _interopDefault(require('lodash/flattenDeep'));
-var fromPairs = _interopDefault(require('lodash/fp/fromPairs'));
 var isString = _interopDefault(require('lodash/isString'));
 var last = _interopDefault(require('lodash/fp/last'));
 var toNumber = _interopDefault(require('lodash/toNumber'));
@@ -99,25 +98,21 @@ var slicedToArray = function () {
  * @param {string} id
  * @param {{}[]}
  */
-var ModalWrapper = Vue.component('cg-modal', {
-  name: 'cg-modal',
+var ModalWrapper = Vue.component('cg-modal-wrapper', {
+  name: 'cg-modal-wrapper',
   props: {
-    id: {
+    modalId: {
       type: String,
       required: true
     },
     title: {
-      required: true
+      required: false
     },
     buttons: {
-      required: true
+      required: false
     },
     size: {
       type: Array
-    },
-    modals: {
-      type: Object,
-      required: true
     },
     result: {
       type: Object,
@@ -129,7 +124,8 @@ var ModalWrapper = Vue.component('cg-modal', {
       type: Function
     },
     static: {
-      required: true
+      default: false,
+      required: false
     }
   },
   data: function data() {
@@ -165,7 +161,7 @@ var ModalWrapper = Vue.component('cg-modal', {
       if (result === undefined) {
         result = this.result;
       }
-      this.modals.emit('close', { id: this.id, result: result });
+      this.$emit('close', { id: this.modalId, result: result });
     },
 
     /**
@@ -176,202 +172,108 @@ var ModalWrapper = Vue.component('cg-modal', {
       if (result === undefined) {
         result = this.result;
       }
-      this.modals.emit('dismiss', { id: this.id, result: result });
+      this.$emit('dismiss', { id: this.modalId, result: result });
     }
   },
   render: function render(h) {
-    var self = this;
-    // create header if a title is specified
-    var header = this.title ? h('div', {
-      class: {
-        'modal-header': true
-      }
-    }, [h('button', {
-      class: { 'close': true },
-      attrs: {
-        'aria-label': 'Close'
-      }
-    }, self.static ? [] : [h('span', {
-      attrs: {
-        'aria-hidden': true
-      },
-      on: {
-        click: function click() {
-          if (!self.static) {
-            self.dismiss();
-          }
-        }
-      }
-    }, '×')]), h('h3', { class: { 'modal-title': true } }, self.title)]) : null;
-    // create footer if there are buttons defined
-    var footer = this.buttons ? h('div', { class: { 'modal-footer': true } }, map(function (button) {
-      return h('button', {
-        class: defineProperty({
-          'btn': true
-        }, button.class, true),
-        ref: button.focus === true ? 'focus' : undefined,
-        on: {
-          click: function click(event) {
-            if (event.x !== 0 && event.y !== 0) {
-              if (button.reject) {
-                self.dismiss({ key: button.key, label: button.label });
-              } else {
-                self.close({ key: button.key, label: button.label });
+    var _this2 = this;
+
+    var header = null;
+    var footer = null;
+    if (this.title) {
+      // create header if a title is specified
+      var headerContent = [];
+      if (!this.static) {
+        headerContent = [h('span', {
+          attrs: {
+            'aria-hidden': true
+          },
+          on: {
+            click: function click() {
+              if (!_this2.static) {
+                _this2.dismiss();
               }
             }
           }
+        }, '×')];
+      }
+      header = h('div', {
+        class: {
+          'modal-header': true
         }
-      }, button.label);
-    })(this.buttons)) : null;
+      }, [h('button', {
+        class: { 'close': true },
+        attrs: {
+          'aria-label': 'Close'
+        }
+      }, headerContent), h('h3', { class: { 'modal-title': true } }, this.title)]);
+    }
+    if (this.buttons) {
+      // create footer if there are buttons defined
+      footer = h('div', {
+        class: {
+          'modal-footer': true
+        }
+      }, this.buttons.map(function (button) {
+        return h('button', {
+          class: defineProperty({
+            'btn': true
+          }, button.class, true),
+          ref: button.focus === true ? 'focus' : undefined,
+          on: {
+            click: function click(event) {
+              if (event.x !== 0 && event.y !== 0) {
+                if (button.reject) {
+                  _this2.dismiss({ key: button.key, label: button.label });
+                } else {
+                  _this2.close({ key: button.key, label: button.label });
+                }
+              }
+            }
+          }
+        }, button.label);
+      }));
+    }
+    var content = this.$slots.default;
+    if (header || footer) {
+      content = [h('div', {
+        class: {
+          'modal-content': true
+        }
+      }, [header, h('div', { class: { 'modal-body': true } }, this.$slots.default), footer])];
+    }
     return h('div', {
       class: {
         modal: true,
         fade: true,
-        'in': self.transition
+        'in': this.transition
       },
       style: {
         display: 'flex'
       },
       on: {
         click: function click() {
-          if (!self.static) {
-            self.dismiss();
+          if (!_this2.static) {
+            _this2.dismiss();
           }
         }
       }
     }, [h('div', {
       class: {
         'modal-dialog': true,
-        'modal-lg': includes('lg')(self.size),
-        'modal-sm': includes('sm')(self.size),
-        'modal-full': includes('full')(self.size),
-        'modal-tall': includes('tall')(self.size)
+        'modal-lg': includes(this.size, 'lg'),
+        'modal-sm': includes(this.size, 'sm'),
+        'modal-full': includes(this.size, 'full'),
+        'modal-tall': includes(this.size, 'tall')
       },
       on: {
         click: function click(event) {
           event.stopPropagation();
         }
       }
-    }, [header || footer ? h('div', {
-      class: {
-        'modal-content': true
-      }
-    }, [header, h('div', { class: { 'modal-body': true } }, [self.$slots.default]), footer]) : self.$slots.default])]);
+    }, content)]);
   }
 });
-
-var name = "@citygro/vue-modal";
-var version = "5.3.0";
-var description = "reusable modal component for vue 2";
-var main = "vue-modal.common.js";
-var jest = {
-  rootDir: "src",
-  moduleFileExtensions: ["jsx", "js", "json"],
-  testPathIgnorePatterns: ["<rootDir>/(build|docs|node_modules)/"],
-  testEnvironment: "jsdom"
-};
-var homepage = "https://gitlab.com/citygro/vue-modal";
-var repository = "gitlab.com:citygro/vue-modal.git";
-var author = "carlos killpack <carlos@citygro.com>";
-var license = "Apache-2.0";
-var keywords = ["vue2", "bootstrap", "modal", "component", "vue"];
-var eslintConfig = {
-  parser: "babel-eslint",
-  parserOptions: {
-    ecmaVersion: 6,
-    sourceType: "module",
-    ecmaFeatures: {
-      jsx: true
-    }
-  },
-  "extends": "standard"
-};
-var babel = {
-  env: {
-    cjs: {
-      presets: ["es2015", "stage-2"]
-    },
-    es: {
-      presets: [["es2015", {
-        modules: false
-      }], "stage-2"]
-    },
-    test: {
-      presets: ["es2015", "stage-2"]
-    }
-  },
-  plugins: ["transform-vue-jsx"]
-};
-var scripts = {
-  lint: "eslint src",
-  test: "jest",
-  start: "cross-env BABEL_ENV=test webpack-dev-server --config example/webpack.conf.js",
-  build: "npm run build:cjs",
-  "build:cjs": "rollup -c rollup.conf.js"
-};
-var peerDependencies = {
-  vue: ">=2.1.0"
-};
-var devDependencies = {
-  "babel-cli": "^6.18.0",
-  "babel-core": "^6.20.0",
-  "babel-eslint": "^7.1.1",
-  "babel-helper-vue-jsx-merge-props": "^2.0.2",
-  "babel-jest": "^18.0.0",
-  "babel-loader": "^6.2.9",
-  "babel-plugin-external-helpers": "^6.18.0",
-  "babel-plugin-syntax-jsx": "^6.18.0",
-  "babel-plugin-transform-runtime": "^6.15.0",
-  "babel-plugin-transform-vue-jsx": "^3.2.0",
-  "babel-polyfill": "^6.20.0",
-  "babel-preset-es2015": "^6.18.0",
-  "babel-preset-stage-2": "^6.18.0",
-  "babel-runtime": "^6.20.0",
-  "cross-env": "^3.1.3",
-  "css-loader": "^0.27.3",
-  eslint: "^3.12.1",
-  "eslint-config-standard": "^6.2.1",
-  "eslint-plugin-promise": "^3.4.0",
-  "eslint-plugin-standard": "^2.0.1",
-  "html-webpack-plugin": "^2.28.0",
-  jest: "^18.1.0",
-  redux: "^3.6.0",
-  "resolve-url-loader": "^2.0.2",
-  rimraf: "^2.5.4",
-  rollup: "^0.37.0",
-  "rollup-plugin-babel": "^2.7.1",
-  "rollup-plugin-json": "^3.0.0",
-  "style-loader": "^0.13.1",
-  vue: "^2.2.4",
-  "vue-loader": "^11.1.4",
-  "vue-style-loader": "^2.0.4",
-  "vue-template-compiler": "^2.2.4",
-  webpack: "^2.2.1",
-  "webpack-dev-server": "^1.16.2"
-};
-var dependencies = {
-  jquery: "^3.1.1",
-  lodash: "^4.17.2",
-  q: "^1.4.1"
-};
-var pkg = {
-  name: name,
-  version: version,
-  description: description,
-  main: main,
-  jest: jest,
-  homepage: homepage,
-  repository: repository,
-  author: author,
-  license: license,
-  keywords: keywords,
-  eslintConfig: eslintConfig,
-  babel: babel,
-  scripts: scripts,
-  peerDependencies: peerDependencies,
-  devDependencies: devDependencies,
-  dependencies: dependencies
-};
 
 var ContentWrapper = (function (content) {
   return Vue.component('cg-content-wrapper', {
@@ -426,24 +328,39 @@ var index = {
      */
     Vue$$1.component('modal-view', {
       render: function render(h) {
-        return h('div', {
+        var viewOptions = {
           class: {
             'modal-view': true
           }
-        }, map(function (options) {
-          return h(ModalWrapper, {
-            attrs: { id: options.id },
+        };
+        var wrappedModals = this.modals.map(function (options) {
+          var componentOptions = {
+            attrs: {
+              id: options.id
+            },
+            on: {
+              close: function close(event) {
+                modals.emit('close', event);
+              },
+              dismiss: function dismiss(event) {
+                modals.emit('dismiss', event);
+              }
+            },
             props: {
+              modalId: options.id,
               title: options.title,
               buttons: options.buttons,
               size: options.size,
               instance: options.instance,
-              modals: modals,
               static: options.static
             },
             class: options.class
-          }, [h(options.Modal, { props: options.props })]);
-        })(this.modals));
+          };
+          var props = options.props;
+          var children = [h(options.Modal, { props: props })];
+          return h(ModalWrapper, componentOptions, children);
+        });
+        return h('div', viewOptions, wrappedModals);
       },
       data: function data() {
         return {
@@ -454,7 +371,13 @@ var index = {
 
       methods: {
         getModals: function getModals() {
-          return fromPairs(stack);
+          return stack.map(function (_ref) {
+            var _ref2 = slicedToArray(_ref, 2),
+                id = _ref2[0],
+                options = _ref2[1];
+
+            return clone(options);
+          });
         }
       },
       /**
@@ -468,9 +391,9 @@ var index = {
          * @param method
          */
         var onDestroy = function onDestroy(method) {
-          return function (_ref) {
-            var id = _ref.id,
-                result = _ref.result;
+          return function (_ref3) {
+            var id = _ref3.id,
+                result = _ref3.result;
 
             var index = findIndex(function (modal) {
               return first(modal) === id;
@@ -643,7 +566,7 @@ var index = {
     Vue$$1.mixin({
       methods: { $openModal: $openModal }
     });
-    console.log('installed @citygro/vue-modal', pkg.version);
+    console.log('installed @citygro/vue-modal');
   }
 };
 

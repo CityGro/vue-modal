@@ -1,6 +1,5 @@
 import Vue from 'vue'
-import map from 'lodash/fp/map'
-import includes from 'lodash/fp/includes'
+import includes from 'lodash/includes'
 
 /**
  * style this component! use bootstrap 3 modal classes
@@ -8,25 +7,21 @@ import includes from 'lodash/fp/includes'
  * @param {string} id
  * @param {{}[]}
  */
-export default Vue.component('cg-modal', {
-  name: 'cg-modal',
+export default Vue.component('cg-modal-wrapper', {
+  name: 'cg-modal-wrapper',
   props: {
-    id: {
+    modalId: {
       type: String,
       required: true
     },
     title: {
-      required: true
+      required: false
     },
     buttons: {
-      required: true
+      required: false
     },
     size: {
       type: Array
-    },
-    modals: {
-      type: Object,
-      required: true
     },
     result: {
       type: Object,
@@ -36,7 +31,8 @@ export default Vue.component('cg-modal', {
       type: Function
     },
     static: {
-      required: true
+      default: false,
+      required: false
     }
   },
   data () {
@@ -69,7 +65,7 @@ export default Vue.component('cg-modal', {
       if (result === undefined) {
         result = this.result
       }
-      this.modals.emit('close', {id: this.id, result})
+      this.$emit('close', {id: this.modalId, result})
     },
     /**
      * close the modal (reject)
@@ -79,101 +75,145 @@ export default Vue.component('cg-modal', {
       if (result === undefined) {
         result = this.result
       }
-      this.modals.emit('dismiss', {id: this.id, result})
+      this.$emit('dismiss', {id: this.modalId, result})
     }
   },
   render (h) {
-    const self = this
-    // create header if a title is specified
-    const header = (this.title) ? h('div', {
-      class: {
-        'modal-header': true
+    let header = null
+    let footer = null
+    if (this.title) {
+      // create header if a title is specified
+      let headerContent = []
+      if (!this.static) {
+        headerContent = [
+          h(
+            'span',
+            {
+              attrs: {
+                'aria-hidden': true
+              },
+              on: {
+                click: () => {
+                  if (!this.static) {
+                    this.dismiss()
+                  }
+                }
+              }
+            },
+            '×'
+          )
+        ]
       }
-    }, [
-      h('button', {
-        class: {'close': true},
-        attrs: {
-          'aria-label': 'Close'
-        }
-      }, (self.static) ? [] : [
-        h('span', {
-          attrs: {
-            'aria-hidden': true
-          },
-          on: {
-            click () {
-              if (!self.static) {
-                self.dismiss()
+      header = h(
+        'div',
+        {
+          class: {
+            'modal-header': true
+          }
+        },
+        [
+          h(
+            'button',
+            {
+              class: {'close': true},
+              attrs: {
+                'aria-label': 'Close'
+              }
+            },
+            headerContent
+          ),
+          h('h3', {class: {'modal-title': true}}, this.title)
+        ]
+      )
+    }
+    if (this.buttons) {
+      // create footer if there are buttons defined
+      footer = h(
+        'div',
+        {
+          class: {
+            'modal-footer': true
+          }
+        },
+        this.buttons.map((button) => {
+          return h('button', {
+            class: {
+              'btn': true,
+              [button.class]: true
+            },
+            ref: (button.focus === true) ? 'focus' : undefined,
+            on: {
+              click: (event) => {
+                if (event.x !== 0 && event.y !== 0) {
+                  if (button.reject) {
+                    this.dismiss({key: button.key, label: button.label})
+                  } else {
+                    this.close({key: button.key, label: button.label})
+                  }
+                }
               }
             }
-          }
-        }, '×')
-      ]),
-      h('h3', {class: {'modal-title': true}}, self.title)
-    ]) : null
-    // create footer if there are buttons defined
-    const footer = (this.buttons) ? h('div', {class: {'modal-footer': true}}, map((button) => {
-      return h('button', {
-        class: {
-          'btn': true,
-          [button.class]: true
-        },
-        ref: (button.focus === true) ? 'focus' : undefined,
-        on: {
-          click (event) {
-            if (event.x !== 0 && event.y !== 0) {
-              if (button.reject) {
-                self.dismiss({key: button.key, label: button.label})
-              } else {
-                self.close({key: button.key, label: button.label})
-              }
-            }
-          }
-        }
-      }, button.label)
-    })(this.buttons)) : null
-    return h('div', {
-      class: {
-        modal: true,
-        fade: true,
-        'in': self.transition
-      },
-      style: {
-        display: 'flex'
-      },
-      on: {
-        click () {
-          if (!self.static) {
-            self.dismiss()
-          }
-        }
-      }
-    }, [
-      h('div', {
-        class: {
-          'modal-dialog': true,
-          'modal-lg': includes('lg')(self.size),
-          'modal-sm': includes('sm')(self.size),
-          'modal-full': includes('full')(self.size),
-          'modal-tall': includes('tall')(self.size)
-        },
-        on: {
-          click (event) {
-            event.stopPropagation()
-          }
-        }
-      }, [
-        (header || footer)
-          ? h('div', {
+          }, button.label)
+        })
+      )
+    }
+    let content = this.$slots.default
+    if (header || footer) {
+      content = [
+        h(
+          'div',
+          {
             class: {
               'modal-content': true
             }
-          }, [
+          },
+          [
             header,
-            h('div', {class: {'modal-body': true}}, [self.$slots.default]),
+            h('div', {class: {'modal-body': true}}, this.$slots.default),
             footer
-          ]) : self.$slots.default
-      ])
-    ])
+          ]
+        )
+      ]
+    }
+    return h(
+      'div',
+      {
+        class: {
+          modal: true,
+          fade: true,
+          'in': this.transition
+        },
+        style: {
+          display: 'flex'
+        },
+        on: {
+          click: () => {
+            if (!this.static) {
+              this.dismiss()
+            }
+          }
+        }
+      },
+      [
+        h(
+          'div',
+          {
+            class: {
+              'modal-dialog': true,
+              'modal-lg': includes(this.size, 'lg'),
+              'modal-sm': includes(this.size, 'sm'),
+              'modal-full': includes(this.size, 'full'),
+              'modal-tall': includes(this.size, 'tall')
+            },
+            on: {
+              click (event) {
+                event.stopPropagation()
+              }
+            }
+          },
+          content
+        )
+      ]
+    )
   }
 })

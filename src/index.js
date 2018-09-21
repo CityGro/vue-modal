@@ -3,14 +3,12 @@ import EventEmmitter from 'events'
 import ModalWrapper from './Modal'
 import Q from 'q'
 import assign from 'lodash/assign'
+import clone from 'lodash/clone'
 import findIndex from 'lodash/fp/findIndex'
 import first from 'lodash/fp/first'
 import flatten from 'lodash/flattenDeep'
-import fromPairs from 'lodash/fp/fromPairs'
 import isString from 'lodash/isString'
 import last from 'lodash/fp/last'
-import map from 'lodash/fp/map'
-import pkg from '../package.json'
 import toNumber from 'lodash/toNumber'
 import uniqueId from 'lodash/uniqueId'
 import {getOptions, resolveContent} from './utils'
@@ -26,24 +24,39 @@ export default {
      */
     Vue.component('modal-view', {
       render (h) {
-        return h('div', {
+        const viewOptions = {
           class: {
             'modal-view': true
           }
-        }, map((options) => h(ModalWrapper, {
-          attrs: {id: options.id},
-          props: {
-            title: options.title,
-            buttons: options.buttons,
-            size: options.size,
-            instance: options.instance,
-            modals,
-            static: options.static
-          },
-          class: options.class
-        }, [
-          h(options.Modal, {props: options.props})
-        ]))(this.modals))
+        }
+        const wrappedModals = this.modals.map((options) => {
+          const componentOptions = {
+            attrs: {
+              id: options.id
+            },
+            on: {
+              close: (event) => {
+                modals.emit('close', event)
+              },
+              dismiss: (event) => {
+                modals.emit('dismiss', event)
+              }
+            },
+            props: {
+              modalId: options.id,
+              title: options.title,
+              buttons: options.buttons,
+              size: options.size,
+              instance: options.instance,
+              static: options.static
+            },
+            class: options.class
+          }
+          const props = options.props
+          const children = [h(options.Modal, {props})]
+          return h(ModalWrapper, componentOptions, children)
+        })
+        return h('div', viewOptions, wrappedModals)
       },
       data () {
         return {
@@ -53,7 +66,7 @@ export default {
       },
       methods: {
         getModals () {
-          return fromPairs(stack)
+          return stack.map(([id, options]) => clone(options))
         }
       },
       /**
@@ -231,6 +244,6 @@ export default {
     Vue.mixin({
       methods: {$openModal}
     })
-    console.log('installed @citygro/vue-modal', pkg.version)
+    console.log('installed @citygro/vue-modal')
   }
 }
